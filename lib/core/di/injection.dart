@@ -1,0 +1,41 @@
+import 'package:get_it/get_it.dart';
+
+import '../../data/local/hive_storage.dart';
+import '../../data/local/secure_storage.dart';
+import '../../data/network/dio_client.dart';
+import '../../features/home/data/home_api_service.dart';
+import '../../features/home/data/home_repository_impl.dart';
+import '../../features/home/domain/home_repository.dart';
+
+final GetIt getIt = GetIt.instance;
+
+/// Registers all dependencies in the service locator.
+///
+/// Call this before `runApp()`.
+Future<void> configureDependencies() async {
+  // ── Local Storage ──
+  final hiveStorage = HiveStorageService();
+  await hiveStorage.init();
+  getIt.registerSingleton<HiveStorageService>(hiveStorage);
+
+  getIt.registerLazySingleton<SecureStorageService>(
+    () => SecureStorageService(),
+  );
+
+  // ── Network ──
+  getIt.registerLazySingleton<DioClient>(
+    () => DioClient(
+      secureStorage: getIt<SecureStorageService>(),
+      cacheStorage: getIt<HiveStorageService>(),
+    ),
+  );
+
+  // ── Feature: Home ──
+  getIt.registerLazySingleton<HomeApiService>(
+    () => HomeApiService(dio: getIt<DioClient>().dio),
+  );
+
+  getIt.registerLazySingleton<HomeRepository>(
+    () => HomeRepositoryImpl(apiService: getIt<HomeApiService>()),
+  );
+}
