@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../core/constants/api_constants.dart';
 import '../../../core/utils/logger.dart';
@@ -10,10 +11,12 @@ class AuthInterceptor extends QueuedInterceptor {
   AuthInterceptor({
     required SecureStorageService secureStorage,
     required Dio tokenDio,
+    this.onLogout,
   })  : _secureStorage = secureStorage,
         _tokenDio = tokenDio;
 
   final SecureStorageService _secureStorage;
+  final VoidCallback? onLogout;
 
   /// A separate Dio instance used exclusively for the token refresh request
   /// to avoid interceptor recursion.
@@ -78,6 +81,7 @@ class AuthInterceptor extends QueuedInterceptor {
 
         // Clear tokens — user must log in again
         await _secureStorage.clearAll();
+        onLogout?.call();
         return handler.reject(err);
       }
     }

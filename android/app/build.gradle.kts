@@ -25,7 +25,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.pyrotyson.pyro_tyson"
+    namespace = "com.vc.super_app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -40,7 +40,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.pyrotyson.pyro_tyson"
+        applicationId = "com.vc.super_app"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
@@ -60,17 +60,17 @@ android {
             dimension = "environment"
             applicationIdSuffix = ".dev"
             versionNameSuffix = "-dev"
-            resValue("string", "app_name", "Pyro Tyson Dev")
+            resValue("string", "app_name", "VC SuperApp Dev")
         }
         create("staging") {
             dimension = "environment"
             applicationIdSuffix = ".staging"
             versionNameSuffix = "-staging"
-            resValue("string", "app_name", "Pyro Tyson Staging")
+            resValue("string", "app_name", "VC SuperApp Staging")
         }
         create("production") {
             dimension = "environment"
-            resValue("string", "app_name", "Pyro Tyson")
+            resValue("string", "app_name", "VC SuperApp")
         }
     }
 

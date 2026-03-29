@@ -16,6 +16,7 @@ class DioClient {
   DioClient({
     required SecureStorageService secureStorage,
     required HiveStorageService cacheStorage,
+    VoidCallback? onLogout,
   }) {
     _dio = _createDio();
     _tokenDio = _createTokenDio();
@@ -25,6 +26,7 @@ class DioClient {
       AuthInterceptor(
         secureStorage: secureStorage,
         tokenDio: _tokenDio,
+        onLogout: onLogout,
       ),
       CacheInterceptor(cacheStorage: cacheStorage),
       RetryInterceptor(dio: _dio),

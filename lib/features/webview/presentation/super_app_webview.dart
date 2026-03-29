@@ -7,17 +7,23 @@ class SuperAppWebView extends StatefulWidget {
   final String? url;
   /// Mock injected token for demonstration
   final String authToken;
-  /// If true, load the React Web App cart
-  final bool useWebApp;
+  /// If provided, dynamically loads this web bundle from assets/mini_apps/
+  final String? miniAppId;
   /// Optional product to add to cart on load
   final Map<String, dynamic>? pendingProductJson;
+  /// An explicit absolute file path to a downloaded OTA mini-app bundle
+  final String? localHtmlFilePath;
+  /// Optional title override provided via routing
+  final String? title;
 
   const SuperAppWebView({
     super.key,
     this.url,
     this.authToken = 'mock_jwt_token_123',
-    this.useWebApp = false,
+    this.miniAppId,
     this.pendingProductJson,
+    this.localHtmlFilePath,
+    this.title,
   });
 
   @override
@@ -74,9 +80,12 @@ class _SuperAppWebViewState extends State<SuperAppWebView> {
     // 4. Load Content
     if (widget.url != null) {
       _controller.loadRequest(Uri.parse(widget.url!));
-    } else if (widget.useWebApp) {
-      // Load React Web App from assets
-      _controller.loadFlutterAsset('assets/web_app/index.html');
+    } else if (widget.localHtmlFilePath != null) {
+      // Load OTA downloaded absolute file path
+      _controller.loadFile(widget.localHtmlFilePath!);
+    } else if (widget.miniAppId != null) {
+      // Load specific React Mini App from assets
+      _controller.loadFlutterAsset('assets/mini_apps/${widget.miniAppId}/index.html');
     } else {
       // Load local test HTML
       _controller.loadFlutterAsset('assets/test_webapp/index.html');
@@ -167,7 +176,7 @@ class _SuperAppWebViewState extends State<SuperAppWebView> {
     // We typically don't show an app bar, or we show a custom native one.
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.useWebApp ? 'Shopping Cart' : 'Mini App'),
+        title: Text(widget.title ?? (widget.miniAppId != null ? 'Mini App: ${widget.miniAppId}' : 'Mini App')),
         elevation: 0,
          // We can intercept the back button to handle internal web history
          // if desired, for now we just pop the route.

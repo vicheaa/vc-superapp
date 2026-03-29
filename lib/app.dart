@@ -5,39 +5,39 @@ import 'core/config/env_config.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 
-class App extends StatelessWidget {
+class App extends ConsumerWidget {
   const App({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return ProviderScope(
-      child: MaterialApp.router(
-        title: EnvConfig.appName,
-        debugShowCheckedModeBanner: false,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(routerProvider);
 
-        // ── Theme ──
-        theme: AppTheme.light,
-        darkTheme: AppTheme.dark,
-        themeMode: ThemeMode.system,
+    return MaterialApp.router(
+      title: EnvConfig.appName,
+      debugShowCheckedModeBanner: false,
 
-        // ── Router ──
-        routerConfig: AppRouter.router,
+      // ── Theme ──
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: ThemeMode.system,
 
-        // ── Flavor Banner Overlay ──
-        builder: (context, child) {
-          if (EnvConfig.isProduction) return child!;
+      // ── Router ──
+      routerConfig: router,
 
-          return Directionality(
-            textDirection: TextDirection.ltr,
-            child: Banner(
-              color: EnvConfig.isDev ? Colors.red : Colors.orange,
-              message: EnvConfig.isDev ? 'DEV' : 'STAGING',
-              location: BannerLocation.topStart,
-              child: child,
-            ),
-          );
-        },
-      ),
+      // ── Flavor Banner Overlay ──
+      builder: (context, child) {
+        if (EnvConfig.isProduction) return child!;
+
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: Banner(
+            color: EnvConfig.isDev ? Colors.red : Colors.orange,
+            message: EnvConfig.isDev ? 'DEV' : 'STAGING',
+            location: BannerLocation.topStart,
+            child: child,
+          ),
+        );
+      },
     );
   }
 }

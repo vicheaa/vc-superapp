@@ -4,8 +4,8 @@ class AppTheme {
   AppTheme._();
 
   // ──── Colors ────
-  static const Color _primaryColor = Color.fromARGB(255, 255, 0, 0);
-  static const Color _seedColor = Color.fromARGB(255, 255, 0, 0);
+  static const Color _primaryColor = Color.fromARGB(255, 0, 39, 84);
+  static const Color _seedColor = Color.fromARGB(255, 0, 39, 84);
 
   // ──── Light Theme ────
   static ThemeData get light {

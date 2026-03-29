@@ -53,3 +53,8 @@ android/key.properties
 # Uncomment these if you don't want to track Firebase configs in version control
 # **/google-services.json
 # **/GoogleService-Info.plist
+
+
+.env.dev
+.env.staging
+.env

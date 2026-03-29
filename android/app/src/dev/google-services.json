@@ -1,0 +1,21 @@
+{
+  "project_info": {
+    "project_number": "1234567890",
+    "project_id": "dummy-dev-project"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:123:android:dummy-dev",
+        "android_client_info": {
+          "package_name": "com.vc.super_app.dev"
+        }
+      },
+      "api_key": [
+        {
+          "current_key": "dummy-api-key-12345-abcde"
+        }
+      ]
+    }
+  ]
+}

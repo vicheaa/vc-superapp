@@ -27,20 +27,20 @@ class EnvConfig {
   static void initDev() => init(
         environment: Environment.dev,
         baseUrl: 'https://jsonplaceholder.typicode.com',
-        appName: 'Pyro Tyson Dev',
+        appName: 'VC SuperApp Dev',
       );
 
   /// Convenience factory for staging flavor
   static void initStaging() => init(
         environment: Environment.staging,
         baseUrl: 'https://jsonplaceholder.typicode.com',
-        appName: 'Pyro Tyson Staging',
+        appName: 'VC SuperApp Staging',
       );
 
   /// Convenience factory for production flavor
   static void initProduction() => init(
         environment: Environment.production,
         baseUrl: 'https://jsonplaceholder.typicode.com',
-        appName: 'Pyro Tyson',
+        appName: 'VC SuperApp',
       );
 }

@@ -3,9 +3,13 @@ import 'package:get_it/get_it.dart';
 import '../../data/local/hive_storage.dart';
 import '../../data/local/secure_storage.dart';
 import '../../data/network/dio_client.dart';
+import '../../features/auth/data/auth_repository_impl.dart';
+import '../../features/auth/domain/auth_repository.dart';
 import '../../features/home/data/home_api_service.dart';
 import '../../features/home/data/home_repository_impl.dart';
 import '../../features/home/domain/home_repository.dart';
+import '../../features/miniapps/data/miniapp_repository_impl.dart';
+import '../../features/miniapps/domain/miniapp_repository.dart';
 
 final GetIt getIt = GetIt.instance;
 
@@ -27,6 +31,19 @@ Future<void> configureDependencies() async {
     () => DioClient(
       secureStorage: getIt<SecureStorageService>(),
       cacheStorage: getIt<HiveStorageService>(),
+      onLogout: () {
+        if (getIt.isRegistered<AuthRepository>()) {
+          getIt<AuthRepository>().markUnauthenticated();
+        }
+      },
+    ),
+  );
+
+  // ── Feature: Auth ──
+  getIt.registerLazySingleton<AuthRepository>(
+    () => AuthRepositoryImpl(
+      secureStorage: getIt<SecureStorageService>(),
+      tokenDio: getIt<DioClient>().dio, // using standard dio for now since we mock it
     ),
   );
 
@@ -37,5 +54,10 @@ Future<void> configureDependencies() async {
 
   getIt.registerLazySingleton<HomeRepository>(
     () => HomeRepositoryImpl(apiService: getIt<HomeApiService>()),
+  );
+
+  // ── Feature: Mini Apps ──
+  getIt.registerLazySingleton<MiniAppRepository>(
+    () => MiniAppRepositoryImpl(dio: getIt<DioClient>().dio),
   );
 }

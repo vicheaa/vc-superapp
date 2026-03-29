@@ -3,9 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/di/injection.dart';
+import '../../../core/widgets/require_permission.dart';
+import '../../auth/presentation/controllers/auth_controller.dart';
 import '../domain/home_repository.dart';
 import '../domain/models/post.dart';
 import 'home_view_model.dart';
+import 'widgets/miniapp_grid.dart';
 
 /// Riverpod provider for [HomeViewModel] state.
 ///
@@ -126,24 +129,32 @@ class HomeScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Pyro Tyson'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.language),
-            tooltip: 'Flutter.dev',
-            onPressed: () => context.push('/webview', extra: 'https://flutter.dev'),
+          RequireAdmin(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.language),
+                  tooltip: 'Flutter.dev',
+                  onPressed: () => context.push('/webview', extra: 'https://flutter.dev'),
+                ),
+                IconButton(
+                   icon: const Icon(Icons.apps),
+                   tooltip: 'Super App Test',
+                   onPressed: () => context.push('/webview'), // no url loads local asset
+                ),
+
+                IconButton(
+                  icon: const Icon(Icons.refresh),
+                  onPressed: () => ref.read(homeViewModelProvider.notifier).refresh(),
+                ),
+              ],
+            ),
           ),
           IconButton(
-             icon: const Icon(Icons.apps),
-             tooltip: 'Super App Test',
-             onPressed: () => context.push('/webview'), // no url loads local asset
-          ),
-          IconButton(
-            icon: const Icon(Icons.shopping_bag),
-            tooltip: 'Native Shop',
-            onPressed: () => context.push('/shop'),
-          ),
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () => ref.read(homeViewModelProvider.notifier).refresh(),
+            icon: const Icon(Icons.logout),
+            tooltip: 'Logout',
+            onPressed: () => ref.read(authProvider.notifier).logout(),
           ),
         ],
       ),
@@ -159,18 +170,24 @@ class HomeScreen extends ConsumerWidget {
   }
 
   Widget _buildData(BuildContext context, WidgetRef ref, HomeState homeState) {
-    if (homeState.items.isEmpty) {
-      return const _EmptyView();
-    }
-
-    return RefreshIndicator(
-      onRefresh: () => ref.read(homeViewModelProvider.notifier).refresh(),
-      child: _PostList(
-        items: homeState.items,
-        isLoadingMore: homeState.isLoadingMore,
-        hasMore: homeState.hasMore,
-        onLoadMore: () => ref.read(homeViewModelProvider.notifier).loadMore(),
-      ),
+    return Column(
+      children: [
+        const MiniAppGrid(),
+        const Divider(height: 1),
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: () => ref.read(homeViewModelProvider.notifier).refresh(),
+            child: homeState.items.isEmpty 
+              ? const _EmptyView() 
+              : _PostList(
+                  items: homeState.items,
+                  isLoadingMore: homeState.isLoadingMore,
+                  hasMore: homeState.hasMore,
+                  onLoadMore: () => ref.read(homeViewModelProvider.notifier).loadMore(),
+                ),
+          ),
+        ),
+      ],
     );
   }
 }
