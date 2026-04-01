@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:vc_super_app/core/widgets/button.dart';
 
 import '../../../core/di/injection.dart';
 import '../../../core/widgets/require_permission.dart';
@@ -158,13 +159,42 @@ class HomeScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: asyncState.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => _ErrorView(
-          message: error.toString(),
-          onRetry: () => ref.read(homeViewModelProvider.notifier).refresh(),
-        ),
-        data: (homeState) => _buildData(context, ref, homeState),
+      // body: asyncState.when(
+      //   loading: () => const Center(child: CircularProgressIndicator()),
+      //   error: (error, _) => _ErrorView(
+      //     message: error.toString(),
+      //     onRetry: () => ref.read(homeViewModelProvider.notifier).refresh(),
+      //   ),
+      //   data: (homeState) => _buildData(context, ref, homeState),
+      // ),
+      body: Column(
+        children: [
+          AppButton(
+            text: 'Button',
+            onPressed: () {},
+          ),
+          SizedBox(height: 12,),
+          AppButton.outlined(
+            text: 'Button',
+            onPressed: () {},
+          ),
+          SizedBox(height: 12,),
+          AppButton.dashed(
+            text: 'Button',
+            onPressed: () {},
+          ),
+          SizedBox(height: 12,),
+          AppButton.text(
+            text: 'Button',
+            onPressed: () {},
+          ),
+          SizedBox(height: 12,),
+          AppButton.filled(
+            isLoading: true,
+            text: 'Button',
+            onPressed: () {},
+          ),
+        ],
       ),
     );
   }

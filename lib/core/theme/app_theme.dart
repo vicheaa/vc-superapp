@@ -1,23 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:vc_super_app/core/theme/app_colors.dart';
 
 class AppTheme {
   AppTheme._();
 
-  // ──── Colors ────
-  static const Color _primaryColor = Color.fromARGB(255, 0, 39, 84);
-  static const Color _seedColor = Color.fromARGB(255, 0, 39, 84);
-
   // ──── Light Theme ────
   static ThemeData get light {
     final colorScheme = ColorScheme.fromSeed(
-      seedColor: _seedColor,
+      seedColor: AppColors.primary400,
       brightness: Brightness.light,
     );
 
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
-      primaryColor: _primaryColor,
+      primaryColor: AppColors.primary400,
       scaffoldBackgroundColor: colorScheme.surface,
       appBarTheme: AppBarTheme(
         centerTitle: true,
@@ -63,14 +60,14 @@ class AppTheme {
   // ──── Dark Theme ────
   static ThemeData get dark {
     final colorScheme = ColorScheme.fromSeed(
-      seedColor: _seedColor,
+      seedColor: AppColors.primary400,
       brightness: Brightness.dark,
     );
 
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
-      primaryColor: _primaryColor,
+      primaryColor: AppColors.primary400,
       scaffoldBackgroundColor: colorScheme.surface,
       appBarTheme: AppBarTheme(
         centerTitle: true,

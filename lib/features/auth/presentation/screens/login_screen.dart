@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:vc_super_app/core/theme/app_colors.dart';
+import 'package:vc_super_app/core/theme/app_text_styles.dart';
 
 import '../controllers/auth_controller.dart';
 import '../../domain/auth_state.dart';
@@ -44,14 +46,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       },
     );
 
-    const primaryBlue = Color(0xFF0D52D6);
-    const bgColor = Color(0xFFF9F9FB);
-    const textColor = Color(0xFF2D3142);
-    const subtitleColor = Color(0xFF5A5E73);
-    const inputFillColor = Color(0xFFF1F3F5);
-
     return Scaffold(
-      backgroundColor: bgColor,
+      backgroundColor: AppColors.neutral10,
       // appBar: AppBar(
       //   backgroundColor: bgColor,
       //   elevation: 0,
@@ -67,30 +63,28 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       //   centerTitle: true,
       // ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
               // Heading
               const Text(
                 'Welcome back.',
                 style: TextStyle(
                   fontSize: 34,
                   fontWeight: FontWeight.w800,
-                  color: textColor,
                   letterSpacing: -1.0,
                 ),
               ),
               const SizedBox(height: 8),
               
               // Subheading
-              const Text(
+              Text(
                 'Sign In to continue your curated journey.',
-                style: TextStyle(
-                  fontSize: 15,
-                  color: subtitleColor,
-                ),
+                style: AppTextStyles.bodyMedium,
               ),
               const SizedBox(height: 48),
 
@@ -100,19 +94,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
-                  color: subtitleColor,
                   letterSpacing: 0.8,
                 ),
               ),
               const SizedBox(height: 8),
               TextField(
                 controller: _emailController,
-                style: const TextStyle(fontWeight: FontWeight.w500, color: textColor),
+                style: const TextStyle(fontWeight: FontWeight.w500),
                 decoration: InputDecoration(
                   hintText: 'name@example.com',
                   hintStyle: const TextStyle(color: Color(0xFF9094A6)),
                   filled: true,
-                  fillColor: inputFillColor,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -128,7 +120,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
-                  color: subtitleColor,
                   letterSpacing: 0.8,
                 ),
               ),
@@ -140,11 +131,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 style: const TextStyle(
                   letterSpacing: 3,
                   fontWeight: FontWeight.w600,
-                  color: textColor,
                 ),
                 decoration: InputDecoration(
                   filled: true,
-                  fillColor: inputFillColor,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -160,7 +149,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 child: TextButton(
                   onPressed: () {},
                   style: TextButton.styleFrom(
-                    foregroundColor: subtitleColor,
                     padding: EdgeInsets.zero,
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -177,7 +165,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ElevatedButton(
                 onPressed: authState.isLoading ? null : _onLoginPressed,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryBlue,
+                  backgroundColor: AppColors.primary300,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 18),
                   shape: RoundedRectangleBorder(
@@ -202,134 +190,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                       ),
               ),
-              const SizedBox(height: 40),
-
-              // Divider
-              Row(
-                children: [
-                  Expanded(
-                    child: Divider(color: Colors.grey.shade300),
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      'OR CONNECT WITH',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        color: subtitleColor,
-                        letterSpacing: 1.0,
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Divider(color: Colors.grey.shade300),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-
-              // Social Buttons
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () {},
-                      style: OutlinedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        side: const BorderSide(color: Color(0xFFF1F3F5)),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 0.5,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(2),
-                            decoration: BoxDecoration(
-                              color: Colors.black,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: const Icon(
-                              Icons.g_mobiledata,
-                              color: Colors.white,
-                              size: 16,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          const Text(
-                            'Google',
-                            style: TextStyle(
-                              color: textColor,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () {},
-                      style: OutlinedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        side: const BorderSide(color: Color(0xFFF1F3F5)),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 0.5,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(Icons.apple, size: 20, color: textColor),
-                          const SizedBox(width: 8),
-                          const Text(
-                            'Apple',
-                            style: TextStyle(
-                              color: textColor,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 32),
-
-              // Create Account
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    "Don't have an account? ",
-                    style: TextStyle(color: subtitleColor, fontSize: 13),
-                  ),
-                  GestureDetector(
-                    onTap: () {},
-                    child: const Text(
-                      'Create Account',
-                      style: TextStyle(
-                        color: primaryBlue,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
             ],
           ),
+        ),
         ),
       ),
     );
