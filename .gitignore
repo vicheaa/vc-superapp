@@ -58,3 +58,7 @@ android/key.properties
 .env.dev
 .env.staging
 .env
+
+
+firebase-credential
+shorebird-credential

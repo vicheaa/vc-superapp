@@ -19,10 +19,7 @@ class MiniAppGrid extends ConsumerWidget {
     final appsAsync = ref.watch(miniappsListProvider);
 
     return appsAsync.when(
-      loading: () => const Padding(
-        padding: EdgeInsets.all(24.0),
-        child: Center(child: CircularProgressIndicator()),
-      ),
+      loading: () => const _MiniAppSkeletonGrid(),
       error: (e, _) => Center(child: Text('Error loading mini apps: $e')),
       data: (apps) {
         if (apps.isEmpty) {
@@ -42,6 +39,95 @@ class MiniAppGrid extends ConsumerWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _MiniAppSkeletonGrid extends StatefulWidget {
+  const _MiniAppSkeletonGrid();
+
+  @override
+  State<_MiniAppSkeletonGrid> createState() => _MiniAppSkeletonGridState();
+}
+
+class _MiniAppSkeletonGridState extends State<_MiniAppSkeletonGrid>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1),
+    )..repeat(reverse: true);
+    _animation = Tween<double>(begin: 0.3, end: 0.8).animate(_controller);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 120,
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: ListView.separated(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        scrollDirection: Axis.horizontal,
+        itemCount: 4, // Show 4 skeletons for horizontal view
+        physics: const NeverScrollableScrollPhysics(),
+        separatorBuilder: (context, index) => const SizedBox(width: 16),
+        itemBuilder: (context, index) {
+          return AnimatedBuilder(
+            animation: _animation,
+            builder: (context, child) {
+              return Opacity(
+                opacity: _animation.value,
+                child: child,
+              );
+            },
+            child: const _MiniAppSkeletonItem(),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _MiniAppSkeletonItem extends StatelessWidget {
+  const _MiniAppSkeletonItem();
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme.surfaceContainerHighest;
+    return SizedBox(
+      width: 80,
+      child: Column(
+        children: [
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            width: 60,
+            height: 12,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

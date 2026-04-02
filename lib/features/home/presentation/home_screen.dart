@@ -170,7 +170,7 @@ class HomeScreen extends ConsumerWidget {
       body: Column(
         children: [
           AppButton(
-            text: 'Button',
+            text: 'Button1',
             onPressed: () {},
           ),
           SizedBox(height: 12,),

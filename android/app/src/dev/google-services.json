@@ -1,21 +1,29 @@
 {
   "project_info": {
-    "project_number": "1234567890",
-    "project_id": "dummy-dev-project"
+    "project_number": "841991886490",
+    "project_id": "vc-super-app",
+    "storage_bucket": "vc-super-app.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:123:android:dummy-dev",
+        "mobilesdk_app_id": "1:841991886490:android:3e759f9af3290765a9b123",
         "android_client_info": {
           "package_name": "com.vc.super_app.dev"
         }
       },
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "dummy-api-key-12345-abcde"
+          "current_key": "AIzaSyBOp2nEvLNRXoRs-Q96LBrxGXqDudo5efA"
         }
-      ]
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
     }
-  ]
+  ],
+  "configuration_version": "1"
 }

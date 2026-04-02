@@ -32,7 +32,7 @@ class NotificationService {
     _notificationsPlugin = FlutterLocalNotificationsPlugin();
 
     const AndroidInitializationSettings androidInitSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher_foreground');
+        AndroidInitializationSettings('@mipmap/ic_launcher');
 
     const DarwinInitializationSettings iosInitSettings =
         DarwinInitializationSettings(
@@ -124,7 +124,7 @@ class NotificationService {
             importance: Importance.high,
             priority: Priority.high,
             playSound: true,
-            icon: '@mipmap/ic_launcher_foreground',
+            icon: '@mipmap/ic_launcher',
             styleInformation: bigPictureStyle,
             enableVibration: true,
           ),
@@ -150,7 +150,7 @@ class NotificationService {
         importance: Importance.high,
         priority: Priority.high,
         playSound: true,
-        icon: '@mipmap/ic_launcher_foreground',
+        icon: '@mipmap/ic_launcher',
         enableVibration: true,
       ),
       iOS: DarwinNotificationDetails(presentSound: true),
