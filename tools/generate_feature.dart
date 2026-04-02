@@ -23,6 +23,7 @@ void main(List<String> args) async {
   _writeRepositoryInterface(baseDir, featureName, pascalName);
   _writeApiService(baseDir, featureName, pascalName);
   _writeRepositoryImpl(baseDir, featureName, pascalName);
+  _writeProvider(baseDir, featureName, pascalName);
   _writeScreen(baseDir, featureName, pascalName);
 
   // 3. Inject DI
@@ -34,6 +35,13 @@ void main(List<String> args) async {
   await _injectIntoRouter(featureName, pascalName);
 
   print('✅ Feature "$pascalName" successfully generated!');
+  print('Files created:');
+  print('  - $baseDir/domain/models/$featureName.dart');
+  print('  - $baseDir/domain/${featureName}_repository.dart');
+  print('  - $baseDir/data/${featureName}_api_service.dart');
+  print('  - $baseDir/data/${featureName}_repository_impl.dart');
+  print('  - $baseDir/presentation/${featureName}_provider.dart');
+  print('  - $baseDir/presentation/${featureName}_screen.dart');
 }
 
 void _writeModel(String base, String name, String pascal) {
@@ -124,14 +132,13 @@ class ${pascal}RepositoryImpl implements ${pascal}Repository {
 ''');
 }
 
-void _writeScreen(String base, String name, String pascal) {
-  File('$base/presentation/${name}_screen.dart').writeAsStringSync('''
-import 'package:flutter/material.dart';
+void _writeProvider(String base, String name, String pascal) {
+  File('$base/presentation/${name}_provider.dart').writeAsStringSync('''
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/di/injection.dart';
-import '../domain/${name}_repository.dart';
 import '../domain/models/$name.dart';
+import '../domain/${name}_repository.dart';
 
 // 1. Local State
 class ${pascal}State {
@@ -167,6 +174,15 @@ class ${pascal}Notifier extends AsyncNotifier<${pascal}State> {
     }
   }
 }
+''');
+}
+
+void _writeScreen(String base, String name, String pascal) {
+  File('$base/presentation/${name}_screen.dart').writeAsStringSync('''
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '${name}_provider.dart';
 
 // 3. UI Screen
 class ${pascal}Screen extends ConsumerWidget {

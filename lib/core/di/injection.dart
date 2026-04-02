@@ -11,6 +11,12 @@ import '../../features/home/domain/home_repository.dart';
 import '../../features/miniapps/data/miniapp_repository_impl.dart';
 import '../../features/miniapps/domain/miniapp_repository.dart';
 
+import '../../features/movie/data/movie_api_service.dart';
+import '../../features/movie/data/movie_repository_impl.dart';
+import '../../features/movie/domain/movie_repository.dart';
+import '../../features/movie/data/movie_api_service.dart';
+import '../../features/movie/data/movie_repository_impl.dart';
+import '../../features/movie/domain/movie_repository.dart';
 // [GENERATED_IMPORTS_INJECTION]
 
 final GetIt getIt = GetIt.instance;
@@ -61,6 +67,24 @@ Future<void> configureDependencies() async {
   // ── Feature: Mini Apps ──
   getIt.registerLazySingleton<MiniAppRepository>(
     () => MiniAppRepositoryImpl(dio: getIt<DioClient>().dio),
+  );
+
+    // ── Feature: Movie ──
+  getIt.registerLazySingleton<MovieApiService>(
+    () => MovieApiService(dio: getIt<DioClient>().dio),
+  );
+
+  getIt.registerLazySingleton<MovieRepository>(
+    () => MovieRepositoryImpl(apiService: getIt<MovieApiService>()),
+  );
+
+    // ── Feature: Movie ──
+  getIt.registerLazySingleton<MovieApiService>(
+    () => MovieApiService(dio: getIt<DioClient>().dio),
+  );
+
+  getIt.registerLazySingleton<MovieRepository>(
+    () => MovieRepositoryImpl(apiService: getIt<MovieApiService>()),
   );
 
   // [GENERATED_DEPENDENCIES_INJECTION]

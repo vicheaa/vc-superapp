@@ -169,7 +169,7 @@ class HomeScreen extends ConsumerWidget {
       body: Column(
         children: [
           AppButton(
-            text: 'Button1',
+            text: 'Button',
             onPressed: () {},
           ),
           SizedBox(height: 12,),
@@ -185,7 +185,7 @@ class HomeScreen extends ConsumerWidget {
           SizedBox(height: 12,),
           AppButton.text(
             text: 'Button',
-            onPressed: () {},
+            onPressed: () {context.push('/news');},
           ),
           SizedBox(height: 12,),
           AppButton.filled(

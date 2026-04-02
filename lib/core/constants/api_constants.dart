@@ -2,9 +2,9 @@ class ApiConstants {
   ApiConstants._();
 
   // Timeouts
-  static const Duration connectTimeout = Duration(seconds: 30);
-  static const Duration receiveTimeout = Duration(seconds: 30);
-  static const Duration sendTimeout = Duration(seconds: 30);
+  static const Duration connectTimeout  = Duration(seconds: 30);
+  static const Duration receiveTimeout  = Duration(seconds: 30);
+  static const Duration sendTimeout     = Duration(seconds: 30);
 
   // Retry
   static const int maxRetries = 3;
@@ -21,4 +21,5 @@ class ApiConstants {
   static const String login = '/auth/login';
   static const String refreshToken = '/auth/refresh';
   static const String posts = '/posts';
+  static const String news = '/news';
 }
