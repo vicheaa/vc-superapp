@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:path/path.dart' as p;
 
 class SuperAppWebView extends StatefulWidget {
   /// The URL to load. If null, we'll load the local test_webapp asset.
@@ -33,6 +35,7 @@ class SuperAppWebView extends StatefulWidget {
 class _SuperAppWebViewState extends State<SuperAppWebView> {
   late final WebViewController _controller;
   bool _isLoading = true;
+  HttpServer? _localServer;
 
   @override
   void initState() {
@@ -50,13 +53,9 @@ class _SuperAppWebViewState extends State<SuperAppWebView> {
             setState(() {
               _isLoading = true;
             });
-            // Example: Injecting token early as soon as page starts.
-            // On some platforms, it might be better to inject on load finish, 
-            // but we try to do it ASAP so Javascript sees it.
             _injectAuthToken();
           },
           onPageFinished: (String url) {
-             // Inject again just to be safe if it was a quick load
             _injectAuthToken();
             setState(() {
               _isLoading = false;
@@ -78,18 +77,91 @@ class _SuperAppWebViewState extends State<SuperAppWebView> {
       );
 
     // 4. Load Content
+    _loadContent();
+  }
+
+  /// Determines how to load the content based on what was provided.
+  Future<void> _loadContent() async {
     if (widget.url != null) {
       _controller.loadRequest(Uri.parse(widget.url!));
     } else if (widget.localHtmlFilePath != null) {
-      // Load OTA downloaded absolute file path
-      _controller.loadFile(widget.localHtmlFilePath!);
+      // Start a local HTTP server to serve OTA-downloaded mini-app bundles.
+      // Android WebView blocks file:// cross-origin requests (CORS),
+      // so we must serve via http://localhost to load JS/CSS assets.
+      await _startLocalServer(widget.localHtmlFilePath!);
     } else if (widget.miniAppId != null) {
-      // Load specific React Mini App from assets
       _controller.loadFlutterAsset('assets/mini_apps/${widget.miniAppId}/index.html');
     } else {
-      // Load local test HTML
       _controller.loadFlutterAsset('assets/test_webapp/index.html');
     }
+  }
+
+  /// Spins up a local HTTP server that serves files from the mini-app directory.
+  /// WebView then loads from http://localhost:PORT/ which avoids all CORS issues.
+  Future<void> _startLocalServer(String indexHtmlPath) async {
+    final bundleDir = Directory(p.dirname(indexHtmlPath));
+
+    // Bind to a random available port on localhost
+    _localServer = await HttpServer.bind('127.0.0.1', 0);
+    final port = _localServer!.port;
+    debugPrint('Local server started on port $port for ${bundleDir.path}');
+
+    // Serve files from the bundle directory
+    _localServer!.listen((HttpRequest request) async {
+      var requestPath = request.uri.path;
+      if (requestPath == '/') requestPath = '/index.html';
+
+      final filePath = p.join(bundleDir.path, requestPath.substring(1));
+      final file = File(filePath);
+
+      if (await file.exists()) {
+        final ext = p.extension(filePath).toLowerCase();
+        final mimeType = _getMimeType(ext);
+
+        // Must use ContentType object — string header gets overridden
+        // by dart:io's default ContentType(text/plain)
+        request.response.headers.contentType = ContentType.parse(mimeType);
+        request.response.headers.set('Access-Control-Allow-Origin', '*');
+        await request.response.addStream(file.openRead());
+        await request.response.close();
+      } else {
+        debugPrint('Local server 404: $requestPath -> $filePath');
+        request.response.statusCode = 404;
+        request.response.write('Not found: $requestPath');
+        await request.response.close();
+      }
+    });
+
+    // Load the mini-app from the local server
+    _controller.loadRequest(Uri.parse('http://127.0.0.1:$port/'));
+  }
+
+  /// Returns the MIME type for common web file extensions.
+  String _getMimeType(String ext) {
+    switch (ext) {
+      case '.html': return 'text/html; charset=utf-8';
+      case '.js':   return 'application/javascript; charset=utf-8';
+      case '.css':  return 'text/css; charset=utf-8';
+      case '.json': return 'application/json; charset=utf-8';
+      case '.png':  return 'image/png';
+      case '.jpg':
+      case '.jpeg': return 'image/jpeg';
+      case '.gif':  return 'image/gif';
+      case '.svg':  return 'image/svg+xml';
+      case '.woff': return 'font/woff';
+      case '.woff2':return 'font/woff2';
+      case '.ttf':  return 'font/ttf';
+      case '.ico':  return 'image/x-icon';
+      case '.webp': return 'image/webp';
+      default:      return 'application/octet-stream';
+    }
+  }
+
+  @override
+  void dispose() {
+    // Stop the local server when the WebView is disposed
+    _localServer?.close(force: true);
+    super.dispose();
   }
 
   /// Injects the auth token as a global Javascript variable
@@ -113,7 +185,6 @@ class _SuperAppWebViewState extends State<SuperAppWebView> {
            }
           break;
         case 'getUserInfo':
-           // Mock fetching API data that the native side has access to
            final responseData = {
               "id": 1,
               "name": "Super App User",
@@ -123,7 +194,6 @@ class _SuperAppWebViewState extends State<SuperAppWebView> {
            _sendDataBackToWeb('userInfoResponse', responseData);
           break;
         case 'showDialog':
-           // Native dialog triggered by Web App
            _showNativeDialog(
              payload['title'] ?? 'Native Dialog',
              payload['message'] ?? 'This was launched from the webview.',
@@ -134,7 +204,6 @@ class _SuperAppWebViewState extends State<SuperAppWebView> {
            _showNativeDialog('Secure Native Checkout', 'Processing payment for \$$total natively!');
           break;
         case 'close':
-           // Close the Web App screen returning to native flutter
            if (Navigator.canPop(context)) {
              Navigator.pop(context);
            }
@@ -147,7 +216,6 @@ class _SuperAppWebViewState extends State<SuperAppWebView> {
     }
   }
 
-  /// Evaluates JS to execute a global function on the web passing data back
   void _sendDataBackToWeb(String action, dynamic data) {
     final encodedData = jsonEncode(data);
     final jsCode = "window.receiveMessageFromNative('$action', $encodedData);";
@@ -172,14 +240,10 @@ class _SuperAppWebViewState extends State<SuperAppWebView> {
 
   @override
   Widget build(BuildContext context) {
-    // A core feature of a Super App webview is it should feel native.
-    // We typically don't show an app bar, or we show a custom native one.
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title ?? (widget.miniAppId != null ? 'Mini App: ${widget.miniAppId}' : 'Mini App')),
         elevation: 0,
-         // We can intercept the back button to handle internal web history
-         // if desired, for now we just pop the route.
       ),
       body: SafeArea(
         child: Stack(

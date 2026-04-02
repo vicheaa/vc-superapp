@@ -39,6 +39,8 @@ dependencies:
   firebase_in_app_messaging: ^0.9.1
   firebase_auth: ^6.3.0
   firebase_app_installations: ^0.4.1
+  archive: ^4.0.9
+  path: ^1.9.1
 
 dev_dependencies:
   flutter_test:

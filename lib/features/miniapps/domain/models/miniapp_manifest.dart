@@ -3,26 +3,29 @@ class MiniAppManifest {
     required this.id,
     required this.name,
     required this.version,
-    required this.description,
+    this.description,
     required this.downloadUrl,
     required this.iconUrl,
+    this.bundleHash,
   });
 
   final String id;
   final String name;
   final String version;
-  final String description;
+  final String? description;
   final String downloadUrl;
   final String iconUrl;
+  final String? bundleHash;
 
   factory MiniAppManifest.fromJson(Map<String, dynamic> json) {
     return MiniAppManifest(
       id: json['id'] as String,
       name: json['name'] as String,
       version: json['version'] as String,
-      description: json['description'] as String,
+      description: json['description'] as String?,
       downloadUrl: json['downloadUrl'] as String,
       iconUrl: json['iconUrl'] as String,
+      bundleHash: json['bundleHash'] as String?,
     );
   }
 
@@ -34,6 +37,7 @@ class MiniAppManifest {
       'description': description,
       'downloadUrl': downloadUrl,
       'iconUrl': iconUrl,
+      'bundleHash': bundleHash,
     };
   }
 }

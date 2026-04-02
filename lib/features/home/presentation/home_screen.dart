@@ -9,6 +9,13 @@ import '../../auth/presentation/controllers/auth_controller.dart';
 import '../domain/home_repository.dart';
 import '../domain/models/post.dart';
 import 'home_view_model.dart';
+import '../../miniapps/domain/miniapp_repository.dart';
+import '../../miniapps/domain/models/miniapp_manifest.dart';
+
+final miniAppsProvider = FutureProvider.autoDispose<List<MiniAppManifest>>((ref) {
+  final repo = getIt<MiniAppRepository>();
+  return repo.getAvailableMiniApps();
+});
 
 /// Riverpod provider for [HomeViewModel] state.
 ///
@@ -158,43 +165,127 @@ class HomeScreen extends ConsumerWidget {
           ),
         ],
       ),
-      // body: asyncState.when(
-      //   loading: () => const Center(child: CircularProgressIndicator()),
-      //   error: (error, _) => _ErrorView(
-      //     message: error.toString(),
-      //     onRetry: () => ref.read(homeViewModelProvider.notifier).refresh(),
-      //   ),
-      //   data: (homeState) => _buildData(context, ref, homeState),
-      // ),
-      body: Column(
-        children: [
-          AppButton(
-            text: 'Button',
-            onPressed: () {},
+      body: ref.watch(miniAppsProvider).when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, _) => Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Failed to load apps: $error'),
+              TextButton(
+                onPressed: () => ref.refresh(miniAppsProvider),
+                child: const Text('Retry'),
+              ),
+            ],
           ),
-          SizedBox(height: 12,),
-          AppButton.outlined(
-            text: 'Button',
-            onPressed: () {},
-          ),
-          SizedBox(height: 12,),
-          AppButton.dashed(
-            text: 'Button',
-            onPressed: () {},
-          ),
-          SizedBox(height: 12,),
-          AppButton.text(
-            text: 'Button',
-            onPressed: () {context.push('/news');},
-          ),
-          SizedBox(height: 12,),
-          AppButton.filled(
-            isLoading: true,
-            text: 'Button',
-            onPressed: () {},
-          ),
-        ],
+        ),
+        data: (miniapps) {
+          if (miniapps.isEmpty) {
+            return const Center(child: Text('No Mini Apps available.'));
+          }
+          return RefreshIndicator(
+            onRefresh: () async => ref.refresh(miniAppsProvider.future),
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: miniapps.length,
+              itemBuilder: (context, index) {
+                final app = miniapps[index];
+                return Card(
+                  elevation: 2,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    leading: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(
+                        app.iconUrl, 
+                        width: 54, 
+                        height: 54, 
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) => const Icon(Icons.broken_image, size: 54),
+                      ),
+                    ),
+                    title: Text(app.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    subtitle: Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text('Version ${app.version}', style: const TextStyle(fontSize: 13)),
+                    ),
+                    trailing: AppButton.filled(
+                      text: 'Open',
+                      width: 80,
+                      height: 36,
+                      borderRadius: 12,
+                      onPressed: () => _openMiniApp(context, ref, app),
+                    ),
+                  ),
+                );
+              },
+            ),
+          );
+        },
       ),
     );
+  }
+
+  Future<void> _openMiniApp(
+    BuildContext context,
+    WidgetRef ref,
+    MiniAppManifest app,
+  ) async {
+    final repo = getIt<MiniAppRepository>();
+
+    // Check if already downloaded and cached
+    final isInstalled = await repo.isAppDownloaded(app);
+    if (isInstalled) {
+      final path = await repo.getInstalledAppPath(app.id);
+      if (path != null && context.mounted) {
+        context.push('/webview', extra: {
+          'localHtmlFilePath': path,
+          'title': app.name,
+        });
+        return;
+      }
+    }
+
+    // Show a loading dialog while downloading
+    if (!context.mounted) return;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        content: Row(
+          children: [
+            const CircularProgressIndicator(),
+            const SizedBox(width: 24),
+            Expanded(child: Text('Installing ${app.name}...')),
+          ],
+        ),
+      ),
+    );
+
+    try {
+      final localPath = await repo.downloadAndInstallApp(app);
+
+      // Close the loading dialog
+      if (context.mounted) Navigator.of(context, rootNavigator: true).pop();
+
+      // Navigate to the WebView with the local file path
+      if (context.mounted) {
+        context.push('/webview', extra: {
+          'localHtmlFilePath': localPath,
+          'title': app.name,
+        });
+      }
+    } catch (e) {
+      // Close the loading dialog
+      if (context.mounted) Navigator.of(context, rootNavigator: true).pop();
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to install ${app.name}: $e')),
+        );
+      }
+    }
   }
 }

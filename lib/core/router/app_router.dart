@@ -14,13 +14,24 @@ final _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 
 /// Application router configuration using GoRouter and Riverpod.
 final routerProvider = Provider<GoRouter>((ref) {
-  final authStateAsync = ref.watch(authProvider);
+  final listenable = ValueNotifier<bool>(false);
+  
+  ref.onDispose(() {
+    listenable.dispose();
+  });
+
+  ref.listen<AsyncValue<AuthState>>(authProvider, (_, __) {
+    listenable.value = !listenable.value;
+  });
 
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/',
+    refreshListenable: listenable,
     debugLogDiagnostics: true,
     redirect: (context, state) {
+      final authStateAsync = ref.read(authProvider);
+
       if (authStateAsync.isLoading || !authStateAsync.hasValue) {
          // Wait for auth initialization
          return null; 

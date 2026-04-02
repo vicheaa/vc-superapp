@@ -11,9 +11,11 @@ class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl({
     required SecureStorageService secureStorage,
     required Dio tokenDio,
-  })  : _secureStorage = secureStorage;
+  })  : _secureStorage = secureStorage,
+        _dio = tokenDio;
 
   final SecureStorageService _secureStorage;
+  final Dio _dio;
 
   final _statusController = StreamController<AuthState>.broadcast();
   AuthState _currentStatus = AuthState.initial;
@@ -71,25 +73,47 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<void> login(String username, String password) async {
     try {
-      // Simulate network delay
-      await Future.delayed(const Duration(seconds: 1));
+      final response = await _dio.post(
+        'http://10.0.3.165:8000/api/v1/auth/login',
+        data: {
+          'email': username,
+          'password': password,
+        },
+      );
 
-      // Mock validation
-      if ((username == 'test@test.com' || username == 'admin@test.com' || username == 'user@test.com') && password == 'password') {
-        // Mock successful login
-        final mockAccessToken = 'mock_jwt_access_token_${DateTime.now().millisecondsSinceEpoch}';
-        
-        final user = _getUserByEmail(username);
-        final mockRefreshToken = user.isAdmin ? 'mock_admin_refresh' : 'mock_user_refresh';
-        
-        await _secureStorage.saveAccessToken(mockAccessToken);
-        await _secureStorage.saveRefreshToken(mockRefreshToken);
-        
-        _updateStatus(AuthState(status: AuthStatus.authenticated, user: user));
-        return;
-      }
+      final data = response.data['data'];
+      final userJson = data['user'];
+      final tokensJson = data['tokens'];
+
+      final accessToken = tokensJson['accessToken'];
+      final refreshToken = tokensJson['refreshToken'];
+
+      // Basic extraction of roles for AppRole enum
+      final roles = List<String>.from(userJson['roles'] ?? []);
+      final roleStr = roles.isNotEmpty ? roles.first : 'user';
+      final appRole = roleStr == 'admin' ? AppRole.admin : AppRole.user;
+
+      final user = User(
+        id: userJson['id'].toString(),
+        email: userJson['email'],
+        role: appRole,
+        permissions: List<String>.from(userJson['permissions'] ?? []),
+      );
+
+      await _secureStorage.saveAccessToken(accessToken);
+      await _secureStorage.saveRefreshToken(refreshToken);
+
+      _updateStatus(AuthState(status: AuthStatus.authenticated, user: user));
+    } on DioException catch (e) {
+      AppLogger.error('Login failed', error: e, tag: 'AUTH');
       
-      throw Exception('Invalid credentials');
+      if (e.response?.data != null) {
+        final resData = e.response!.data;
+        if (resData['message'] != null) {
+          throw Exception(resData['message']);
+        }
+      }
+      throw Exception('Network or server error occurred');
     } catch (e) {
       AppLogger.error('Login failed', error: e, tag: 'AUTH');
       rethrow;
