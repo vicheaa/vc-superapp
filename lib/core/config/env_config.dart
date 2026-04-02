@@ -5,13 +5,13 @@ class EnvConfig {
   static late String _baseUrl;
   static late String _appName;
 
-  static Environment get environment => _environment;
-  static String get baseUrl => _baseUrl;
-  static String get appName => _appName;
+  static Environment get environment   => _environment;
+  static String get baseUrl            => _baseUrl;
+  static String get appName            => _appName;
 
-  static bool get isDev => _environment == Environment.dev;
-  static bool get isStaging => _environment == Environment.staging;
-  static bool get isProduction => _environment == Environment.production;
+  static bool get isDev                => _environment == Environment.dev;
+  static bool get isStaging            => _environment == Environment.staging;
+  static bool get isProduction         => _environment == Environment.production;
 
   static void init({
     required Environment environment,

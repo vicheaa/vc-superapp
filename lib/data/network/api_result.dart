@@ -12,8 +12,7 @@ sealed class ApiResult<T> {
   const ApiResult();
 
   factory ApiResult.success(T data) = ApiSuccess<T>;
-  factory ApiResult.failure(String message, {int? statusCode}) =
-      ApiFailure<T>;
+  factory ApiResult.failure(String message, {int? statusCode}) = ApiFailure<T>;
 
   R when<R>({
     required R Function(T data) success,

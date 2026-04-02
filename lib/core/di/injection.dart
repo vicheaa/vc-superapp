@@ -11,6 +11,8 @@ import '../../features/home/domain/home_repository.dart';
 import '../../features/miniapps/data/miniapp_repository_impl.dart';
 import '../../features/miniapps/domain/miniapp_repository.dart';
 
+// [GENERATED_IMPORTS_INJECTION]
+
 final GetIt getIt = GetIt.instance;
 
 /// Registers all dependencies in the service locator.
@@ -60,4 +62,6 @@ Future<void> configureDependencies() async {
   getIt.registerLazySingleton<MiniAppRepository>(
     () => MiniAppRepositoryImpl(dio: getIt<DioClient>().dio),
   );
+
+  // [GENERATED_DEPENDENCIES_INJECTION]
 }

@@ -8,6 +8,8 @@ import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/webview/presentation/super_app_webview.dart';
 
+// [GENERATED_IMPORTS_ROUTER]
+
 final _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 
 /// Application router configuration using GoRouter and Riverpod.
@@ -86,6 +88,8 @@ final routerProvider = Provider<GoRouter>((ref) {
            return SuperAppWebView(url: url);
         },
       ),
+      
+      // [GENERATED_ROUTES_ROUTER]
     ],
     errorBuilder: (context, state) => Scaffold(
       body: Center(

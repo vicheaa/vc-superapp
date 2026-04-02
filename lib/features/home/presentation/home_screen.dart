@@ -9,7 +9,6 @@ import '../../auth/presentation/controllers/auth_controller.dart';
 import '../domain/home_repository.dart';
 import '../domain/models/post.dart';
 import 'home_view_model.dart';
-import 'widgets/miniapp_grid.dart';
 
 /// Riverpod provider for [HomeViewModel] state.
 ///
@@ -124,7 +123,7 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final asyncState = ref.watch(homeViewModelProvider);
+    ref.watch(homeViewModelProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -195,179 +194,6 @@ class HomeScreen extends ConsumerWidget {
             onPressed: () {},
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildData(BuildContext context, WidgetRef ref, HomeState homeState) {
-    return Column(
-      children: [
-        const MiniAppGrid(),
-        const Divider(height: 1),
-        Expanded(
-          child: RefreshIndicator(
-            onRefresh: () => ref.read(homeViewModelProvider.notifier).refresh(),
-            child: homeState.items.isEmpty 
-              ? const _EmptyView() 
-              : _PostList(
-                  items: homeState.items,
-                  isLoadingMore: homeState.isLoadingMore,
-                  hasMore: homeState.hasMore,
-                  onLoadMore: () => ref.read(homeViewModelProvider.notifier).loadMore(),
-                ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// ──── Post List ────
-
-class _PostList extends StatelessWidget {
-  const _PostList({
-    required this.items,
-    required this.isLoadingMore,
-    required this.hasMore,
-    required this.onLoadMore,
-  });
-
-  final List<Post> items;
-  final bool isLoadingMore;
-  final bool hasMore;
-  final VoidCallback onLoadMore;
-
-  @override
-  Widget build(BuildContext context) {
-    return NotificationListener<ScrollNotification>(
-      onNotification: (notification) {
-        if (notification is ScrollEndNotification &&
-            notification.metrics.extentAfter < 200 &&
-            hasMore &&
-            !isLoadingMore) {
-          onLoadMore();
-        }
-        return false;
-      },
-      child: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: items.length + (isLoadingMore ? 1 : 0),
-        itemBuilder: (context, index) {
-          if (index == items.length) {
-            return const Padding(
-              padding: EdgeInsets.symmetric(vertical: 16),
-              child: Center(child: CircularProgressIndicator()),
-            );
-          }
-          return _PostCard(post: items[index]);
-        },
-      ),
-    );
-  }
-}
-
-// ──── Post Card ────
-
-class _PostCard extends StatelessWidget {
-  const _PostCard({required this.post});
-
-  final Post post;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              post.title,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              post.body,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-              ),
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ──── Empty View ────
-
-class _EmptyView extends StatelessWidget {
-  const _EmptyView();
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.inbox_outlined,
-            size: 64,
-            color: Theme.of(context).colorScheme.outline,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'No posts yet',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ──── Error View ────
-
-class _ErrorView extends StatelessWidget {
-  const _ErrorView({required this.message, required this.onRetry});
-
-  final String message;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: Theme.of(context).colorScheme.error,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: onRetry,
-              icon: const Icon(Icons.refresh),
-              label: const Text('Retry'),
-            ),
-          ],
-        ),
       ),
     );
   }

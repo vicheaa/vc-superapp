@@ -9,8 +9,7 @@ import '../domain/models/post.dart';
 /// - Extending [BaseViewModel] for loading/error state
 /// - Using [PaginationMixin] for paginated data loading
 class HomeViewModel extends BaseViewModel with PaginationMixin<Post> {
-  HomeViewModel({required HomeRepository repository})
-      : _repository = repository;
+  HomeViewModel({required HomeRepository repository}) : _repository = repository;
 
   final HomeRepository _repository;
 
