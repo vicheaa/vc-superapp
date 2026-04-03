@@ -59,12 +59,16 @@ class AuthRepositoryImpl implements AuthRepository {
       return const User(
         id: '1',
         email: 'admin@test.com',
+        name: 'Super Admin',
+        avatarUrl: 'https://img.freepik.com/free-vector/gradient-anime-character-illustration_23-2149451996.jpg',
         role: AppRole.admin,
       );
     }
     return const User(
       id: '2',
       email: 'user@test.com',
+      name: 'Vichea Saro',
+      avatarUrl: 'https://img.freepik.com/free-vector/shogun-samurai-warrior-traditional-illustration-culture_23-2148783472.jpg',
       role: AppRole.user,
       permissions: ['view_dashboard', 'buy_items'],
     );
@@ -96,6 +100,8 @@ class AuthRepositoryImpl implements AuthRepository {
       final user = User(
         id: userJson['id'].toString(),
         email: userJson['email'],
+        name: userJson['name'] ?? userJson['email'].split('@').first,
+        avatarUrl: userJson['avatar_url'],
         role: appRole,
         permissions: List<String>.from(userJson['permissions'] ?? []),
       );

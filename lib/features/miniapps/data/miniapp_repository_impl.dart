@@ -1,7 +1,8 @@
 import 'dart:io';
-
+import 'dart:isolate';
 import 'package:archive/archive.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../../core/utils/logger.dart';
@@ -70,86 +71,174 @@ class MiniAppRepositoryImpl implements MiniAppRepository {
       // ── Step 1: Download the .zip to a temporary path ──
       final tempDir = await getTemporaryDirectory();
       final zipPath = '${tempDir.path}/${app.id}_bundle.zip';
+      final zipFile = File(zipPath);
 
       AppLogger.info('Downloading from: ${app.downloadUrl}', tag: 'OTA');
       AppLogger.info('Saving ZIP to: $zipPath', tag: 'OTA');
 
       // Download with retry logic.
-      // Laravel's `php artisan serve` (PHP's built-in server) is
-      // single-threaded and intermittently drops connections.
-      List<int>? downloadedBytes;
+      // Laravel's `php artisan serve` is single-threaded and often drops 
+      // connections for larger files. Switching to streaming download.
+      bool downloadSuccess = false;
 
       for (int attempt = 1; attempt <= 3; attempt++) {
         try {
           AppLogger.info('Download attempt $attempt/3...', tag: 'OTA');
 
-          final freshDio = Dio(BaseOptions(
-            connectTimeout: const Duration(seconds: 60),
-            receiveTimeout: const Duration(minutes: 5),
+          // Ensure any partial/old file is removed before retrying
+          if (await zipFile.exists()) {
+            await zipFile.delete();
+          }
+
+          // ── Step 1: Download the .zip file ──
+          if (onProgress != null) onProgress(0.1);
+
+          // 1-second "Breathing Room" for single-threaded artisan server
+          await Future.delayed(const Duration(seconds: 1));
+
+          // Create a clean Dio instance specifically for downloads.
+          final cleanDio = Dio(BaseOptions(
+            connectTimeout: const Duration(minutes: 2),
+            receiveTimeout: const Duration(minutes: 20),
           ));
 
-          final response = await freshDio.get<List<int>>(
-            app.downloadUrl,
-            options: Options(
-              responseType: ResponseType.bytes,
-              headers: {
-                'Connection': 'close',
-                'Accept': '*/*',
+          try {
+            AppLogger.info('Requesting stream for ${app.id}...', tag: 'OTA');
+            
+            int lastLoggedMb = 0;
+            final response = await cleanDio.download(
+              app.downloadUrl,
+              zipPath,
+              onReceiveProgress: (received, total) {
+                if (total != -1 && onProgress != null) {
+                  onProgress((received / total) * 0.8);
+                  
+                  // Log every 1MB to help debug stalls
+                  final currentMb = received ~/ (1024 * 1024);
+                  if (currentMb > lastLoggedMb) {
+                    lastLoggedMb = currentMb;
+                    AppLogger.info('[OTA] Download progress: $currentMb / ${total ~/ (1024 * 1024)} MB', tag: 'OTA');
+                  }
+                }
               },
-            ),
-          );
+              options: Options(
+                headers: {
+                  'Accept': '*/*',
+                  'Accept-Encoding': 'identity',
+                  if (dio.options.headers['Authorization'] != null)
+                    'Authorization': dio.options.headers['Authorization'],
+                },
+                followRedirects: true,
+                validateStatus: (status) => status != null && status < 500,
+              ),
+            );
 
-          downloadedBytes = response.data;
-          AppLogger.info(
-            'Download complete. Received ${downloadedBytes?.length ?? 0} bytes',
-            tag: 'OTA',
-          );
+            // Check if the file is valid and non-empty
+            final zipSize = await zipFile.length();
+            AppLogger.info('Downloaded ZIP size: ${(zipSize / 1024 / 1024).toStringAsFixed(2)} MB', tag: 'OTA');
+
+            if (zipSize == 0) {
+              throw Exception('Server returned 0 bytes (Empty file or Access Denied)');
+            }
+
+            if (response.statusCode != 200) {
+              throw Exception('Server Error: ${response.statusCode} ${response.statusMessage}');
+            }
+          } catch (e) {
+            if (e is DioException) {
+              final status = e.response?.statusCode;
+              final msg = e.response?.statusMessage;
+              AppLogger.error('Download Failed [$status]: $msg', tag: 'OTA');
+            }
+            rethrow;
+          } finally {
+            cleanDio.close();
+          }
+
+          AppLogger.info('Download complete.', tag: 'OTA');
+          downloadSuccess = true;
           break; // Success — exit retry loop
         } catch (e) {
           AppLogger.error('Attempt $attempt failed: $e', tag: 'OTA');
           if (attempt == 3) rethrow;
-          await Future.delayed(const Duration(seconds: 1));
+          // Increase delay between retries to let the Laravel server recover
+          await Future.delayed(Duration(seconds: attempt * 2));
         }
       }
 
-      await File(zipPath).writeAsBytes(downloadedBytes!);
-      if (onProgress != null) onProgress(0.8);
-
-      // Verify the downloaded file exists and has content
-      final zipFile = File(zipPath);
-      final zipSize = await zipFile.length();
-      AppLogger.info('Downloaded ZIP size: $zipSize bytes', tag: 'OTA');
-
-      if (zipSize == 0) {
-        throw Exception('Downloaded ZIP file is empty');
+      if (!downloadSuccess) {
+        throw Exception('Failed to download miniapp after 3 attempts');
       }
+
+      if (onProgress != null) onProgress(0.85);
 
       // ── Step 2: Clear old installation ──
       if (await dir.exists()) {
-        final existingFiles = dir.listSync();
-        for (final entity in existingFiles) {
-          await entity.delete(recursive: true);
-        }
+        await dir.delete(recursive: true);
       }
       await dir.create(recursive: true);
 
-      // ── Step 3: Extract .zip into the mini-app directory ──
-      AppLogger.info('Extracting ZIP to: ${dir.path}', tag: 'OTA');
-      final zipBytes = await zipFile.readAsBytes();
-      final archive = ZipDecoder().decodeBytes(zipBytes);
+      if (onProgress != null) onProgress(0.9);
 
-      AppLogger.info('Archive contains ${archive.length} entries', tag: 'OTA');
+      // ── Step 3: Extract .zip into the mini-app directory (BACKGROUND THREAD) ──
+      final zipFileForIsolate = File(zipPath);
+      final dirPath = dir.path;
 
-      for (final file in archive) {
-        final filePath = '${dir.path}/${file.name}';
-        if (file.isFile) {
-          AppLogger.info('  Extracting file: ${file.name}', tag: 'OTA');
-          final outFile = File(filePath);
-          await outFile.create(recursive: true);
-          await outFile.writeAsBytes(file.content as List<int>);
-        } else {
-          await Directory(filePath).create(recursive: true);
+      AppLogger.info('Starting TOTAL background process (Read + Extract)...', tag: 'OTA');
+      
+      final result = await Isolate.run(() async {
+        try {
+          // Read bytes INSIDE the isolate to keep main thread memory clean
+          final bytes = zipFileForIsolate.readAsBytesSync();
+          final archive = ZipDecoder().decodeBytes(bytes);
+          
+          // Detect if the ZIP has a common top-level folder (e.g. "dist/" or "shopping_demo_v1/")
+          // We want to strip this to "flatten" the structure into the root.
+          String prefix = '';
+          String? commonRoot;
+          
+          for (final file in archive) {
+            final name = file.name;
+            if (name.trim().isEmpty || name.startsWith('__MACOSX')) continue;
+            final parts = name.split('/');
+            if (parts.length == 1 && file.isFile) {
+              commonRoot = null;
+              break;
+            }
+            final currentRoot = '${parts[0]}/';
+            if (commonRoot == null) {
+              commonRoot = currentRoot;
+            } else if (commonRoot != currentRoot) {
+              commonRoot = null;
+              break;
+            }
+          }
+          prefix = commonRoot ?? '';
+
+          for (final file in archive) {
+            String relativeName = file.name;
+            if (prefix.isNotEmpty && relativeName.startsWith(prefix)) {
+              relativeName = relativeName.substring(prefix.length);
+            }
+            if (relativeName.isEmpty) continue;
+
+            final filePath = '$dirPath/$relativeName';
+            if (file.isFile) {
+              final outFile = File(filePath);
+              outFile.createSync(recursive: true);
+              outFile.writeAsBytesSync(file.content as List<int>);
+            } else {
+              Directory(filePath).createSync(recursive: true);
+            }
+          }
+          return true;
+        } catch (e) {
+          return false;
         }
+      });
+
+      if (!result) {
+        throw Exception('Extraction failed in background thread');
       }
 
       if (onProgress != null) onProgress(0.95);
@@ -159,21 +248,27 @@ class MiniAppRepositoryImpl implements MiniAppRepository {
       await versionFile.writeAsString(app.version);
 
       // ── Step 5: Cleanup the temp zip file ──
-      await zipFile.delete();
+      if (await zipFile.exists()) {
+        await zipFile.delete();
+      }
 
       if (onProgress != null) onProgress(1.0);
+
+      // ── DEBUG: List ALL files in the directory ──
+      debugPrint('[OTA] --- Final Installation Tree ---');
+      final allFiles = dir.listSync(recursive: true);
+      for (final f in allFiles) {
+        debugPrint('[OTA]   [File] ${f.path}');
+      }
+      debugPrint('[OTA] -------------------------------');
 
       // Find the index.html path
       final indexPath = await _findIndexHtml(dir);
       if (indexPath == null) {
-        // List all extracted files for debugging
-        final allFiles = dir.listSync(recursive: true);
-        for (final f in allFiles) {
-          AppLogger.info('  Found: ${f.path}', tag: 'OTA');
-        }
-        throw Exception('index.html not found in extracted bundle');
+        throw Exception('index.html not found in extracted bundle (checked recursively)');
       }
 
+      debugPrint('[OTA] Successfully installed ${app.id} at $indexPath');
       AppLogger.info(
         'Successfully installed ${app.id} at $indexPath',
         tag: 'OTA',
@@ -191,6 +286,7 @@ class MiniAppRepositoryImpl implements MiniAppRepository {
     }
   }
 
+
   @override
   Future<String?> getInstalledAppPath(String appId) async {
     final dir = await _getMiniAppDirectory(appId);
@@ -201,7 +297,10 @@ class MiniAppRepositoryImpl implements MiniAppRepository {
   Future<String?> _findIndexHtml(Directory dir) async {
     // Check root level first
     final rootIndex = File('${dir.path}/index.html');
-    if (await rootIndex.exists()) return rootIndex.path;
+    if (await rootIndex.exists()) {
+       AppLogger.info('Found entry point at root: ${rootIndex.path}', tag: 'OTA');
+       return rootIndex.path;
+    }
 
     // Search deeper (e.g. dist/, build/)
     if (!await dir.exists()) return null;
@@ -209,6 +308,7 @@ class MiniAppRepositoryImpl implements MiniAppRepository {
     final children = dir.listSync(recursive: true);
     for (final entity in children) {
       if (entity is File && entity.path.endsWith('index.html')) {
+        AppLogger.info('Found entry point at: ${entity.path}', tag: 'OTA');
         return entity.path;
       }
     }
@@ -217,6 +317,3 @@ class MiniAppRepositoryImpl implements MiniAppRepository {
   }
 }
 
-void debugPrint(String message) {
-  AppLogger.info(message, tag: 'OTA_DEBUG');
-}

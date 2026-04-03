@@ -131,10 +131,52 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(homeViewModelProvider);
+    final user = ref.watch(authProvider).value?.user;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Pyro Tyson'),
+        centerTitle: false,
+        title: Row(
+          children: [
+            CircleAvatar(
+              radius: 18,
+              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+              backgroundImage: user?.avatarUrl != null 
+                ? NetworkImage(user!.avatarUrl!) 
+                : null,
+              child: user?.avatarUrl == null 
+                ? Text(
+                    user?.name?.substring(0, 1).toUpperCase() ?? 'U',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  )
+                : null,
+            ),
+            const SizedBox(width: 12),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Welcome back,',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: Theme.of(context).colorScheme.secondary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                Text(
+                  user?.name ?? 'Pyro Tyson',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
         actions: [
           RequireAdmin(
             child: Row(
@@ -282,8 +324,26 @@ class HomeScreen extends ConsumerWidget {
       if (context.mounted) Navigator.of(context, rootNavigator: true).pop();
 
       if (context.mounted) {
+        String errorMessage = e.toString();
+        
+        // Make the error message more user-friendly
+        if (errorMessage.contains('Connection closed while receiving data')) {
+          errorMessage = 'Download interrupted. Try again or check your server connection.';
+        } else if (errorMessage.contains('Connection timeout')) {
+          errorMessage = 'Download timed out. Ensure the server is reachable.';
+        }
+
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to install ${app.name}: $e')),
+          SnackBar(
+            content: Text('Failed to install ${app.name}: $errorMessage'),
+            backgroundColor: Colors.red.shade800,
+            behavior: SnackBarBehavior.floating,
+            action: SnackBarAction(
+              label: 'Retry',
+              textColor: Colors.white,
+              onPressed: () => _openMiniApp(context, ref, app),
+            ),
+          ),
         );
       }
     }

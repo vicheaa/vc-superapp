@@ -108,39 +108,51 @@ class _SuperAppWebViewState extends State<SuperAppWebView> {
 
     // Serve files from the bundle directory
     _localServer!.listen((HttpRequest request) async {
-      var requestPath = request.uri.path;
-      if (requestPath == '/') requestPath = '/index.html';
+      try {
+        var requestPath = request.uri.path;
+        if (requestPath == '/') requestPath = '/index.html';
 
-      final filePath = p.join(bundleDir.path, requestPath.substring(1));
-      final file = File(filePath);
+        final filePath = p.join(bundleDir.path, requestPath.substring(1));
+        final file = File(filePath);
 
-      if (await file.exists()) {
-        final ext = p.extension(filePath).toLowerCase();
-        final mimeType = _getMimeType(ext);
-
-        // Must use ContentType object — string header gets overridden
-        // by dart:io's default ContentType(text/plain)
-        request.response.headers.contentType = ContentType.parse(mimeType);
-        request.response.headers.set('Access-Control-Allow-Origin', '*');
-        await request.response.addStream(file.openRead());
-        await request.response.close();
-      } else {
-        debugPrint('Local server 404: $requestPath -> $filePath');
-        request.response.statusCode = 404;
-        request.response.write('Not found: $requestPath');
+        if (await file.exists()) {
+          final mimeType = _getMimeType(requestPath);
+          request.response.headers.contentType = ContentType.parse(mimeType);
+          
+          // CRITICAL: Disable MIME sniffing. Modern browsers/WebViews block scripts 
+          // if their type isn't explicitly declared correctly and 'nosniff' is set.
+          request.response.headers.set('X-Content-Type-Options', 'nosniff');
+          request.response.headers.set('Access-Control-Allow-Origin', '*');
+          
+          await request.response.addStream(file.openRead());
+        } else {
+          // Safe-404: Return correct MIME with empty body to avoid blocking subsequent scripts (ORB Fix)
+          final mimeType = _getMimeType(requestPath);
+          request.response.headers.contentType = ContentType.parse(mimeType);
+          request.response.headers.set('X-Content-Type-Options', 'nosniff');
+          request.response.statusCode = HttpStatus.notFound;
+          debugPrint('[Server] 404: $requestPath (Served as $mimeType)');
+        }
+      } catch (e) {
+        debugPrint('[Server] Error: $e');
+        request.response.statusCode = HttpStatus.internalServerError;
+      } finally {
         await request.response.close();
       }
     });
 
     // Load the mini-app from the local server
-    _controller.loadRequest(Uri.parse('http://127.0.0.1:$port/'));
+    final serverUrl = 'http://127.0.0.1:$port/';
+    debugPrint('[Server] Loading: $serverUrl');
+    await _controller.loadRequest(Uri.parse(serverUrl));
   }
 
   /// Returns the MIME type for common web file extensions.
-  String _getMimeType(String ext) {
+  String _getMimeType(String requestPath) {
+    final ext = p.extension(requestPath).toLowerCase();
     switch (ext) {
       case '.html': return 'text/html; charset=utf-8';
-      case '.js':   return 'application/javascript; charset=utf-8';
+      case '.js':   return 'text/javascript; charset=utf-8';
       case '.css':  return 'text/css; charset=utf-8';
       case '.json': return 'application/json; charset=utf-8';
       case '.png':  return 'image/png';
@@ -166,7 +178,12 @@ class _SuperAppWebViewState extends State<SuperAppWebView> {
 
   /// Injects the auth token as a global Javascript variable
   void _injectAuthToken() {
-    final jsCode = "window.superAppAuthToken = '${widget.authToken}'; window.receiveMessageFromNative('updateToken', '${widget.authToken}');";
+    final jsCode = """
+      window.superAppAuthToken = '${widget.authToken}'; 
+      if (typeof window.receiveMessageFromNative === 'function') {
+        window.receiveMessageFromNative('updateToken', '${widget.authToken}');
+      }
+    """;
     _controller.runJavaScript(jsCode);
   }
 
@@ -241,10 +258,10 @@ class _SuperAppWebViewState extends State<SuperAppWebView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title ?? (widget.miniAppId != null ? 'Mini App: ${widget.miniAppId}' : 'Mini App')),
-        elevation: 0,
-      ),
+      // appBar: AppBar(
+      //   title: Text(widget.title ?? (widget.miniAppId != null ? 'Mini App: ${widget.miniAppId}' : 'Mini App')),
+      //   elevation: 0,
+      // ),
       body: SafeArea(
         child: Stack(
           children: [

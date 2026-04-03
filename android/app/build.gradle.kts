@@ -48,9 +48,9 @@ android {
         versionName = flutter.versionName
         multiDexEnabled = true
 
-        ndk {
-            abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86_64")
-        }
+        // ndk {
+        //     abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86_64")
+        // }
     }
 
     // ── Flavors ──
