@@ -5,9 +5,11 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/domain/auth_state.dart';
 import '../../features/auth/presentation/controllers/auth_controller.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
+import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/webview/presentation/super_app_webview.dart';
 
+import '../../features/profile/presentation/profile_screen.dart';
 // [GENERATED_IMPORTS_ROUTER]
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
@@ -26,33 +28,39 @@ final routerProvider = Provider<GoRouter>((ref) {
 
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
-    initialLocation: '/',
+    initialLocation: '/splash',
     refreshListenable: listenable,
     debugLogDiagnostics: true,
     redirect: (context, state) {
       final authStateAsync = ref.read(authProvider);
 
       if (authStateAsync.isLoading || !authStateAsync.hasValue) {
-         // Wait for auth initialization
+         // Stay on splash while initializing
          return null; 
       }
 
       final authState = authStateAsync.value!;
       final isAuth = authState.status == AuthStatus.authenticated;
+      final isGoingToSplash = state.uri.toString() == '/splash';
       final isGoingToLogin = state.uri.toString() == '/login';
       final isAdminRoute = state.uri.toString().startsWith('/admin');
       
-      // If unauthenticated and not going to login, redirect to login
+      // If unauthenticated and not going to login, redirect away from home/protected routes
       if (!isAuth && !isGoingToLogin) {
         return '/login';
       }
       
-      // If authenticated and trying to go to login, redirect to home
-      if (isAuth && isGoingToLogin) {
+      // If authenticated and trying to go to login or splash, redirect to home
+      if (isAuth && (isGoingToLogin || isGoingToSplash)) {
         return '/';
       }
 
-      // Check RBAC (Admin checks can be repurposed if other admin routes are created)
+      // If unauthenticated and on splash, go to login
+      if (!isAuth && isGoingToSplash) {
+        return '/login';
+      }
+
+      // Check RBAC
       if (isAdminRoute && isAuth) {
          if (authState.user?.isAdmin != true) {
             return '/'; // fallback, not authorized
@@ -62,6 +70,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
+      GoRoute(
+        path: '/splash',
+        name: 'splash',
+        builder: (context, state) => const SplashScreen(),
+      ),
       GoRoute(
         path: '/login',
         name: 'login',
@@ -100,6 +113,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         },
       ),
       
+            GoRoute(
+        path: '/profile',
+        name: 'profile',
+        builder: (context, state) => const ProfileScreen(),
+      ),
       // [GENERATED_ROUTES_ROUTER]
     ],
     errorBuilder: (context, state) => Scaffold(

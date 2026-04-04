@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -13,6 +14,7 @@ class SecureStorageService {
   static const String _usernameKey  = 'username';
   static const String _passwordKey  = 'password';
   static const String _fcmtoken     = 'fcm_token';
+  static const String _userDataKey  = 'user_data';
 
   // ──── Access Token ────
 
@@ -34,6 +36,45 @@ class SecureStorageService {
     } catch (e) {
       if (kDebugMode) {
         print('Error saving access token: $e');
+      }
+      return false;
+    }
+  }
+
+  // ──── User Data ────
+
+  Future<bool> saveUserData(Map<String, dynamic> userData) async {
+    try {
+      await _storage.write(key: _userDataKey, value: jsonEncode(userData));
+      return true;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error saving user data: $e');
+      }
+      return false;
+    }
+  }
+
+  Future<Map<String, dynamic>?> getUserData() async {
+    try {
+      final jsonStr = await _storage.read(key: _userDataKey);
+      if (jsonStr == null) return null;
+      return jsonDecode(jsonStr) as Map<String, dynamic>;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error reading user data: $e');
+      }
+      return null;
+    }
+  }
+
+  Future<bool> deleteUserData() async {
+    try {
+      await _storage.delete(key: _userDataKey);
+      return true;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error deleting user data: $e');
       }
       return false;
     }

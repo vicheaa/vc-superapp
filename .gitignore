@@ -58,6 +58,7 @@ android/key.properties
 .env.dev
 .env.staging
 .env
+.env.production
 
 
 firebase-credential

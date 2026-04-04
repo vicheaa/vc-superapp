@@ -9,13 +9,13 @@ class AppColors {
   static const Color primary100 = Color.fromARGB(255, 150, 180, 220);
   static const Color primary200 = Color.fromARGB(255, 100, 135, 180);
   static const Color primary300 = Color.fromARGB(255, 50, 90, 140);
-  static const Color primary400 = Color.fromARGB(255, 0, 39, 84);
-  static const Color primary500 = Color.fromARGB(255, 0, 39, 84);
-  static const Color primary600 = Color.fromARGB(255, 0, 39, 84);
-  static const Color primary700 = Color.fromARGB(255, 0, 39, 84);
-  static const Color primary800 = Color.fromARGB(255, 0, 39, 84);
-  static const Color primary900 = Color.fromARGB(255, 0, 39, 84);
-  static const Color primary950 = Color.fromARGB(255, 0, 39, 84);
+  static const Color primary400 = Color.fromARGB(255, 6, 62, 137);
+  static const Color primary500 = Color.fromARGB(255, 6, 62, 137);
+  static const Color primary600 = Color.fromARGB(255, 6, 62, 137);
+  static const Color primary700 = Color.fromARGB(255, 6, 62, 137);
+  static const Color primary800 = Color.fromARGB(255, 6, 62, 137);  // rgba(6, 62, 137, 1)
+  static const Color primary900 = Color.fromARGB(255, 6, 62, 137);
+  static const Color primary950 = Color.fromARGB(255, 6, 62, 137);
 
   // Secondary Colors
   static const Color secondary50 = Color(0xFFf2f8fd);

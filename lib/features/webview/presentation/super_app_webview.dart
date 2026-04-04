@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:vc_super_app/core/widgets/custom_progress_indicator.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:path/path.dart' as p;
 
@@ -258,19 +260,18 @@ class _SuperAppWebViewState extends State<SuperAppWebView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   title: Text(widget.title ?? (widget.miniAppId != null ? 'Mini App: ${widget.miniAppId}' : 'Mini App')),
-      //   elevation: 0,
-      // ),
-      body: SafeArea(
-        child: Stack(
-          children: [
-            WebViewWidget(controller: _controller),
-            if (_isLoading)
-              const Center(
-                child: CircularProgressIndicator(),
-              ),
-          ],
+      body: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.dark,
+        child: SafeArea(
+          child: Stack(
+            children: [
+              WebViewWidget(controller: _controller),
+              if (_isLoading)
+                const Center(
+                  child: AppCircularProgressIndicator(),
+                ),
+            ],
+          ),
         ),
       ),
     );

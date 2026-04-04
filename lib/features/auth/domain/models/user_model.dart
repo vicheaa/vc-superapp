@@ -24,4 +24,29 @@ class User {
     if (isAdmin) return true; // Admins override all specific permissions
     return permissions.contains(permission);
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'email': email,
+      'name': name,
+      'avatar_url': avatarUrl,
+      'role': role.name,
+      'permissions': permissions,
+    };
+  }
+
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      id: json['id'],
+      email: json['email'],
+      name: json['name'],
+      avatarUrl: json['avatar_url'],
+      role: AppRole.values.firstWhere(
+        (e) => e.name == (json['role'] ?? 'user'),
+        orElse: () => AppRole.user,
+      ),
+      permissions: List<String>.from(json['permissions'] ?? []),
+    );
+  }
 }

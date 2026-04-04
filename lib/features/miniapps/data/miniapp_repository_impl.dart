@@ -8,26 +8,29 @@ import 'package:path_provider/path_provider.dart';
 import '../../../core/utils/logger.dart';
 import '../domain/miniapp_repository.dart';
 import '../domain/models/miniapp_manifest.dart';
+import 'miniapp_api_service.dart';
 
 class MiniAppRepositoryImpl implements MiniAppRepository {
-  MiniAppRepositoryImpl({required this.dio});
+  MiniAppRepositoryImpl({
+    required MiniAppApiService apiService,
+    required Dio dio,
+  })  : _apiService = apiService,
+        _dio = dio;
 
-  final Dio dio;
-
-
+  final MiniAppApiService _apiService;
+  final Dio _dio;
 
   @override
   Future<List<MiniAppManifest>> getAvailableMiniApps() async {
-    try {
-      final response = await dio.get('http://10.0.3.165:8000/api/v1/miniapps');
-      final data = response.data['data']['miniApps'] as List;
-      return data
-          .map((e) => MiniAppManifest.fromJson(e as Map<String, dynamic>))
-          .toList();
-    } catch (e) {
-      AppLogger.error('Failed to fetch miniapps', error: e, tag: 'OTA');
-      rethrow;
-    }
+    final result = await _apiService.getAvailableMiniApps();
+
+    return result.when(
+      success: (data) => data.miniApps,
+      failure: (message, statusCode) {
+        AppLogger.error('Failed to fetch miniapps: $message', tag: 'OTA');
+        throw Exception(message);
+      },
+    );
   }
 
   /// Returns the permanent directory for a given mini-app on this device.
@@ -77,20 +80,16 @@ class MiniAppRepositoryImpl implements MiniAppRepository {
       AppLogger.info('Saving ZIP to: $zipPath', tag: 'OTA');
 
       // Download with retry logic.
-      // Laravel's `php artisan serve` is single-threaded and often drops 
-      // connections for larger files. Switching to streaming download.
       bool downloadSuccess = false;
 
       for (int attempt = 1; attempt <= 3; attempt++) {
         try {
           AppLogger.info('Download attempt $attempt/3...', tag: 'OTA');
 
-          // Ensure any partial/old file is removed before retrying
           if (await zipFile.exists()) {
             await zipFile.delete();
           }
 
-          // ── Step 1: Download the .zip file ──
           if (onProgress != null) onProgress(0.1);
 
           // 1-second "Breathing Room" for single-threaded artisan server
@@ -113,7 +112,6 @@ class MiniAppRepositoryImpl implements MiniAppRepository {
                 if (total != -1 && onProgress != null) {
                   onProgress((received / total) * 0.8);
                   
-                  // Log every 1MB to help debug stalls
                   final currentMb = received ~/ (1024 * 1024);
                   if (currentMb > lastLoggedMb) {
                     lastLoggedMb = currentMb;
@@ -125,15 +123,14 @@ class MiniAppRepositoryImpl implements MiniAppRepository {
                 headers: {
                   'Accept': '*/*',
                   'Accept-Encoding': 'identity',
-                  if (dio.options.headers['Authorization'] != null)
-                    'Authorization': dio.options.headers['Authorization'],
+                  if (_dio.options.headers['Authorization'] != null)
+                    'Authorization': _dio.options.headers['Authorization'],
                 },
                 followRedirects: true,
                 validateStatus: (status) => status != null && status < 500,
               ),
             );
 
-            // Check if the file is valid and non-empty
             final zipSize = await zipFile.length();
             AppLogger.info('Downloaded ZIP size: ${(zipSize / 1024 / 1024).toStringAsFixed(2)} MB', tag: 'OTA');
 
@@ -157,11 +154,10 @@ class MiniAppRepositoryImpl implements MiniAppRepository {
 
           AppLogger.info('Download complete.', tag: 'OTA');
           downloadSuccess = true;
-          break; // Success — exit retry loop
+          break;
         } catch (e) {
           AppLogger.error('Attempt $attempt failed: $e', tag: 'OTA');
           if (attempt == 3) rethrow;
-          // Increase delay between retries to let the Laravel server recover
           await Future.delayed(Duration(seconds: attempt * 2));
         }
       }
@@ -188,12 +184,9 @@ class MiniAppRepositoryImpl implements MiniAppRepository {
       
       final result = await Isolate.run(() async {
         try {
-          // Read bytes INSIDE the isolate to keep main thread memory clean
           final bytes = zipFileForIsolate.readAsBytesSync();
           final archive = ZipDecoder().decodeBytes(bytes);
           
-          // Detect if the ZIP has a common top-level folder (e.g. "dist/" or "shopping_demo_v1/")
-          // We want to strip this to "flatten" the structure into the root.
           String prefix = '';
           String? commonRoot;
           
@@ -254,21 +247,12 @@ class MiniAppRepositoryImpl implements MiniAppRepository {
 
       if (onProgress != null) onProgress(1.0);
 
-      // ── DEBUG: List ALL files in the directory ──
-      debugPrint('[OTA] --- Final Installation Tree ---');
-      final allFiles = dir.listSync(recursive: true);
-      for (final f in allFiles) {
-        debugPrint('[OTA]   [File] ${f.path}');
-      }
-      debugPrint('[OTA] -------------------------------');
-
       // Find the index.html path
       final indexPath = await _findIndexHtml(dir);
       if (indexPath == null) {
         throw Exception('index.html not found in extracted bundle (checked recursively)');
       }
 
-      debugPrint('[OTA] Successfully installed ${app.id} at $indexPath');
       AppLogger.info(
         'Successfully installed ${app.id} at $indexPath',
         tag: 'OTA',
@@ -295,14 +279,12 @@ class MiniAppRepositoryImpl implements MiniAppRepository {
 
   /// Recursively searches for index.html inside the extracted directory.
   Future<String?> _findIndexHtml(Directory dir) async {
-    // Check root level first
     final rootIndex = File('${dir.path}/index.html');
     if (await rootIndex.exists()) {
        AppLogger.info('Found entry point at root: ${rootIndex.path}', tag: 'OTA');
        return rootIndex.path;
     }
 
-    // Search deeper (e.g. dist/, build/)
     if (!await dir.exists()) return null;
 
     final children = dir.listSync(recursive: true);

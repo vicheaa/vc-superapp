@@ -181,6 +181,7 @@ void _writeScreen(String base, String name, String pascal) {
   File('$base/presentation/${name}_screen.dart').writeAsStringSync('''
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:vc_super_app/core/widgets/custom_progress_indicator.dart';
 
 import '${name}_provider.dart';
 
@@ -196,7 +197,7 @@ class ${pascal}Screen extends ConsumerWidget {
       appBar: AppBar(title: const Text('$pascal')),
       body: state.when(
         data: (data) {
-          if (data.isLoading) return const Center(child: CircularProgressIndicator());
+          if (data.isLoading) return const Center(child: AppCircularProgressIndicator());
           if (data.errorMessage != null) return Center(child: Text(data.errorMessage!));
           
           return ListView.builder(
@@ -208,7 +209,7 @@ class ${pascal}Screen extends ConsumerWidget {
             },
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: AppCircularProgressIndicator()),
         error: (err, stack) => Center(child: Text('Error: \$err')),
       ),
     );

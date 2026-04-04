@@ -41,6 +41,7 @@ dependencies:
   firebase_app_installations: ^0.4.1
   archive: ^4.0.9
   path: ^1.9.1
+  flutter_dotenv: ^6.0.0
 
 dev_dependencies:
   flutter_test:
@@ -53,5 +54,11 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  assets:
+    - .env.dev
+    - .env.example
+    - .env.staging
+    - .env.production
 
 

@@ -19,11 +19,11 @@ Future<void> bootstrap({required Environment environment}) async {
     // ── Environment Configuration ──
     switch (environment) {
       case Environment.dev:
-        EnvConfig.initDev();
+        await EnvConfig.initDev();
       case Environment.staging:
-        EnvConfig.initStaging();
+        await EnvConfig.initStaging();
       case Environment.production:
-        EnvConfig.initProduction();
+        await EnvConfig.initProduction();
     }
 
     // ── Global Error Handler Init ──
