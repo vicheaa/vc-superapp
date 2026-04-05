@@ -13,7 +13,7 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:vc_super_app/data/local/secure_storage.dart';
+import 'package:oml_central/data/local/secure_storage.dart';
 
 class HelpersUtils {
   HelpersUtils._();

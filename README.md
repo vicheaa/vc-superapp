@@ -1,4 +1,4 @@
-# VC SuperApp
+# OML Central
 
 A production-grade Flutter Super App that hosts native screens alongside dynamically loaded web-based mini-apps. Built with Clean Architecture, Riverpod state management, and a robust JavaScript bridge for native ↔ web communication.
 
@@ -36,7 +36,7 @@ A production-grade Flutter Super App that hosts native screens alongside dynamic
 
 ```bash
 git clone <repository-url>
-cd vc-superapp
+cd oml-central
 flutter pub get
 ```
 
@@ -68,9 +68,9 @@ You need **three Firebase apps** (one per flavor), each with the correct **packa
 
 | Flavor       | Android Package Name       | iOS Bundle ID               |
 | ------------ | -------------------------- | --------------------------- |
-| `dev`        | `com.vc.super_app.dev`     | `com.vc.superApp.dev`       |
-| `staging`    | `com.vc.super_app.staging` | `com.vc.superApp.staging`   |
-| `production` | `com.vc.super_app`         | `com.vc.superApp`           |
+| `dev`        | `com.oml.central.dev`     | `com.oml.central.dev`       |
+| `staging`    | `com.oml.central.staging` | `com.oml.central.staging`   |
+| `production` | `com.oml.central`         | `com.oml.central`           |
 
 > The Android `applicationIdSuffix` is defined in `android/app/build.gradle.kts` under `productFlavors`.
 
@@ -83,11 +83,11 @@ Download each flavor's `google-services.json` from the Firebase Console and plac
 ```
 android/app/src/
 ├── dev/
-│   └── google-services.json        ← Firebase app for com.vc.super_app.dev
+│   └── google-services.json        ← Firebase app for com.oml.central.dev
 ├── staging/
-│   └── google-services.json        ← Firebase app for com.vc.super_app.staging
+│   └── google-services.json        ← Firebase app for com.oml.central.staging
 └── production/
-    └── google-services.json        ← Firebase app for com.vc.super_app
+    └── google-services.json        ← Firebase app for com.oml.central
 ```
 
 > The `build.gradle.kts` conditionally applies the Google Services plugin only if at least one `google-services.json` is found.
@@ -982,12 +982,12 @@ There are **two error hierarchies** used at different layers:
 
 ### Import Conventions
 
-Use **`package:vc_super_app/` imports** (absolute package imports) for consistency and IDE support:
+Use **`package:oml_central/` imports** (absolute package imports) for consistency and IDE support:
 
 ```dart
 // ✅ Preferred
-import 'package:vc_super_app/core/theme/app_colors.dart';
-import 'package:vc_super_app/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:oml_central/core/theme/app_colors.dart';
+import 'package:oml_central/features/auth/presentation/controllers/auth_controller.dart';
 ```
 
 ### Logging

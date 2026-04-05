@@ -2,7 +2,7 @@ import 'dart:math' as math;
 import 'dart:ui' show clampDouble;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:vc_super_app/core/theme/app_colors.dart';
+import 'package:oml_central/core/theme/app_colors.dart';
 
 // ignore_for_file: no_leading_underscores_for_local_identifiers
 

@@ -25,7 +25,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.vc.super_app"
+    namespace = "com.oml.central"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -41,7 +41,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.vc.super_app"
+        applicationId = "com.oml.central"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
@@ -61,17 +61,17 @@ android {
             dimension = "environment"
             applicationIdSuffix = ".dev"
             versionNameSuffix = "-dev"
-            resValue("string", "app_name", "VC SuperApp Dev")
+            resValue("string", "app_name", "OML Central Dev")
         }
         create("staging") {
             dimension = "environment"
             applicationIdSuffix = ".staging"
             versionNameSuffix = "-staging"
-            resValue("string", "app_name", "VC SuperApp Staging")
+            resValue("string", "app_name", "OML Central Staging")
         }
         create("production") {
             dimension = "environment"
-            resValue("string", "app_name", "VC SuperApp")
+            resValue("string", "app_name", "OML Central")
         }
     }
 

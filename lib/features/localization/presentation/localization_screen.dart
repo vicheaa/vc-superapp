@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:vc_super_app/core/theme/app_colors.dart';
-import 'package:vc_super_app/core/theme/app_text_styles.dart';
-import 'package:vc_super_app/core/widgets/button.dart';
-import 'package:vc_super_app/core/widgets/custom_progress_indicator.dart';
+import 'package:oml_central/core/theme/app_colors.dart';
+import 'package:oml_central/core/theme/app_text_styles.dart';
+import 'package:oml_central/core/widgets/button.dart';
+import 'package:oml_central/core/widgets/custom_progress_indicator.dart';
 
 import 'localization_provider.dart';
 

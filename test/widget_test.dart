@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:vc_super_app/core/config/env_config.dart';
-import 'package:vc_super_app/core/di/injection.dart';
+import 'package:oml_central/core/config/env_config.dart';
+import 'package:oml_central/core/di/injection.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:vc_super_app/app.dart';
+import 'package:oml_central/app.dart';
 
 void main() {
   setUpAll(() async {

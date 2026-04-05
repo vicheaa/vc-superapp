@@ -181,7 +181,7 @@ void _writeScreen(String base, String name, String pascal) {
   File('$base/presentation/${name}_screen.dart').writeAsStringSync('''
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:vc_super_app/core/widgets/custom_progress_indicator.dart';
+import 'package:oml_central/core/widgets/custom_progress_indicator.dart';
 
 import '${name}_provider.dart';
 

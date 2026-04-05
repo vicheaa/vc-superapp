@@ -1,4 +1,4 @@
-package com.vc.super_app
+package com.oml.central
 
 import io.flutter.embedding.android.FlutterActivity
 

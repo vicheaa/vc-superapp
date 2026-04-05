@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:vc_super_app/core/theme/app_colors.dart';
-import 'package:vc_super_app/core/theme/app_text_styles.dart';
+import 'package:oml_central/core/theme/app_colors.dart';
+import 'package:oml_central/core/theme/app_text_styles.dart';
 
 import '../controllers/auth_controller.dart';
 import '../../domain/auth_state.dart';
@@ -49,20 +49,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.neutral10,
-      // appBar: AppBar(
-      //   backgroundColor: bgColor,
-      //   elevation: 0,
-      //   title: const Text(
-      //     'VC Supper App',
-      //     style: TextStyle(
-      //       color: textColor,
-      //       fontWeight: FontWeight.w700,
-      //       fontSize: 20,
-      //       letterSpacing: -0.5,
-      //     ),
-      //   ),
-      //   centerTitle: true,
-      // ),
       body: AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.dark,
         child: SafeArea(

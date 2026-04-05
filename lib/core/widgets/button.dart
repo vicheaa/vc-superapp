@@ -1,6 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-// import 'package:vc_super_app/core/widgets/custom_progress_indicator.dart';
+// import 'package:oml_central/core/widgets/custom_progress_indicator.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 

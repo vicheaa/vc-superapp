@@ -35,7 +35,7 @@ class EnvConfig {
     await init(
       environment: Environment.dev,
       baseUrl: dotenv.env['DEV_BASE_URL']!,
-      appName: 'VC SuperApp Dev',
+      appName: 'OML Central Dev',
       imgUrl: dotenv.env['DEV_IMG_URL'],
     );
   }
@@ -46,7 +46,7 @@ class EnvConfig {
     await init(
         environment: Environment.staging,
         baseUrl: dotenv.env['STAGING_BASE_URL']!,
-        appName: 'VC SuperApp Staging',
+        appName: 'OML Central Staging',
         imgUrl: dotenv.env['STAGING_IMG_URL'],
       );
   }
@@ -57,7 +57,7 @@ class EnvConfig {
     await init(
         environment: Environment.production,
         baseUrl: dotenv.env['PROD_BASE_URL']!,
-        appName: 'VC SuperApp',
+        appName: 'OML Central',
         imgUrl: dotenv.env['PROD_IMG_URL'],
       );
   }
