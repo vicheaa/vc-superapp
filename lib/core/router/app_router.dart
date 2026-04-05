@@ -10,6 +10,7 @@ import '../../features/home/presentation/home_screen.dart';
 import '../../features/webview/presentation/super_app_webview.dart';
 
 import '../../features/profile/presentation/profile_screen.dart';
+import '../../features/localization/presentation/localization_screen.dart';
 // [GENERATED_IMPORTS_ROUTER]
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
@@ -117,6 +118,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/profile',
         name: 'profile',
         builder: (context, state) => const ProfileScreen(),
+      ),
+            GoRoute(
+        path: '/localization',
+        name: 'localization',
+        builder: (context, state) => const LocalizationScreen(),
       ),
       // [GENERATED_ROUTES_ROUTER]
     ],

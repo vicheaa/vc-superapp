@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/widgets/button.dart';
-import '../../../../core/widgets/dialog.dart';
-import '../../auth/presentation/controllers/auth_controller.dart';
+import 'package:vc_super_app/features/localization/presentation/localization_provider.dart';
+import 'package:vc_super_app/core/theme/app_colors.dart';
+import 'package:vc_super_app/core/theme/app_text_styles.dart';
+import 'package:vc_super_app/core/widgets/button.dart';
+import 'package:vc_super_app/core/widgets/dialog.dart';
+import 'package:vc_super_app/features/auth/presentation/controllers/auth_controller.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -118,36 +119,45 @@ class ProfileScreen extends ConsumerWidget {
             icon: Icons.person_outline,
             title: 'Account Information',
             onTap: () {},
+            ref: ref,
           ),
           _buildSettingItem(
             icon: Icons.security_outlined,
             title: 'Security & Password',
             onTap: () {},
+            ref: ref,
           ),
           _buildSettingItem(
             icon: Icons.notifications_none_outlined,
             title: 'Notification Preferences',
             onTap: () {},
+            ref: ref,
           ),
           _buildSettingItem(
             icon: Icons.language,
             title: 'App Language',
-            onTap: () {},
+            onTap: () {
+              context.push('/localization');
+            },
+            ref: ref,
           ),
           _buildSettingItem(
             icon: Icons.privacy_tip_outlined,
             title: 'Privacy Policy',
             onTap: () {},
+            ref: ref,
           ),
           _buildSettingItem(
             icon: Icons.help_outline,
             title: 'Help & Support',
             onTap: () {},
+            ref: ref,
           ),
           _buildSettingItem(
             icon: Icons.info_outline,
-            title: 'About App',
+            title: 'setting.about_app',
             onTap: () {},
+            ref: ref,
           ),
         ],
       ),
@@ -158,7 +168,10 @@ class ProfileScreen extends ConsumerWidget {
     required IconData icon,
     required String title,
     required VoidCallback onTap,
+    required WidgetRef ref,
   }) {
+    ref.watch(localizationProvider);
+    final notifier = ref.read(localizationProvider.notifier);
     return Container(
       // margin: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
@@ -175,8 +188,12 @@ class ProfileScreen extends ConsumerWidget {
           ),
           child: Icon(icon, color: AppColors.primary500, size: 22),
         ),
+        // title: Text(
+        //   title,
+        //   style: AppTextStyles.bodyMedium,
+        // ),
         title: Text(
-          title,
+          notifier.translate(title),
           style: AppTextStyles.bodyMedium,
         ),
         trailing: const Icon(

@@ -13,6 +13,9 @@ import '../../features/miniapps/domain/miniapp_repository.dart';
 import '../../features/profile/data/profile_api_service.dart';
 import '../../features/profile/data/profile_repository_impl.dart';
 import '../../features/profile/domain/profile_repository.dart';
+import '../../features/localization/data/localization_api_service.dart';
+import '../../features/localization/data/localization_service.dart';
+import '../../data/local/local_storage.dart';
 // [GENERATED_IMPORTS_INJECTION]
 
 final GetIt getIt = GetIt.instance;
@@ -25,6 +28,10 @@ Future<void> configureDependencies() async {
   final hiveStorage = HiveStorageService();
   await hiveStorage.init();
   getIt.registerSingleton<HiveStorageService>(hiveStorage);
+
+  final localStorage = LocalStorageUtils();
+  await localStorage.init();
+  getIt.registerSingleton<LocalStorageUtils>(localStorage);
 
   getIt.registerLazySingleton<SecureStorageService>(
     () => SecureStorageService(),
@@ -75,6 +82,19 @@ Future<void> configureDependencies() async {
 
   getIt.registerLazySingleton<ProfileRepository>(
     () => ProfileRepositoryImpl(apiService: getIt<ProfileApiService>()),
+  );
+
+    // ── Feature: Localization ──
+  getIt.registerLazySingleton<LocalizationApiService>(
+    () => LocalizationApiService(dio: getIt<DioClient>().dio),
+  );
+
+  getIt.registerLazySingleton<LocalizationService>(
+    () => LocalizationService(
+      apiService: getIt<LocalizationApiService>(),
+      localStorage: getIt<LocalStorageUtils>(),
+      secureStorage: getIt<SecureStorageService>(),
+    ),
   );
 
   // [GENERATED_DEPENDENCIES_INJECTION]

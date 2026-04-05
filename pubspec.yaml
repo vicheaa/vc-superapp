@@ -60,6 +60,8 @@ flutter:
     - .env.example
     - .env.staging
     - .env.production
+    - assets/lang/
+    - assets/icon/
  
   fonts:
     - family: Kantumruy

@@ -1,0 +1,18 @@
+{
+    "global": {
+        "setting": "Setting",
+        "security_and_privacy": "Security and Privacy"
+    },
+    "home": {
+        "profile": "Profile"
+    },
+    "localization": {
+        "title": "Language",
+        "select_language": "Select Language",
+        "description": "Choose your preferred language for the app experience.",
+        "en": "English",
+        "km": "Khmer",
+        "confirm": "Confirm"
+    },
+    "version": "0.0.1"
+}

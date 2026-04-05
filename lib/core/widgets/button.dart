@@ -1,6 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:vc_super_app/core/widgets/custom_progress_indicator.dart';
+// import 'package:vc_super_app/core/widgets/custom_progress_indicator.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 
@@ -120,7 +120,7 @@ class AppButton extends StatelessWidget {
       return SizedBox(
         height: 24,
         width: 24,
-        child: AppCircularProgressIndicator(
+        child: CircularProgressIndicator(
           strokeWidth: 2.5,
           color: textColor,
         ),
@@ -141,7 +141,7 @@ class AppButton extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: AppTextStyles.bodyLarge.copyWith(
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w500,
               color: textColor,
             ),
           ),

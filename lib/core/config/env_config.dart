@@ -41,16 +41,24 @@ class EnvConfig {
   }
 
   /// Convenience factory for staging flavor
-  static Future<void> initStaging() => init(
+  static Future<void> initStaging() async {
+    await dotenv.load(fileName: ".env.staging");
+    await init(
         environment: Environment.staging,
-        baseUrl: 'https://jsonplaceholder.typicode.com',
+        baseUrl: dotenv.env['STAGING_BASE_URL']!,
         appName: 'VC SuperApp Staging',
+        imgUrl: dotenv.env['STAGING_IMG_URL'],
       );
+  }
 
   /// Convenience factory for production flavor
-  static Future<void> initProduction() => init(
+  static Future<void> initProduction() async {
+    await dotenv.load(fileName: ".env.production");
+    await init(
         environment: Environment.production,
-        baseUrl: 'https://jsonplaceholder.typicode.com',
+        baseUrl: dotenv.env['PROD_BASE_URL']!,
         appName: 'VC SuperApp',
+        imgUrl: dotenv.env['PROD_IMG_URL'],
       );
+  }
 }

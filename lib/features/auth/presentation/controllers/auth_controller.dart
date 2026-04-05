@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/di/injection.dart';
 import '../../domain/auth_repository.dart';
 import '../../domain/auth_state.dart';
+import '../../../localization/presentation/localization_provider.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return getIt<AuthRepository>();
@@ -23,6 +24,10 @@ class AuthController extends AsyncNotifier<AuthState> {
 
     // Listen to repository status changes and update state accordingly
     _statusSubscription = _repository.statusStream.listen((stateData) {
+      if (stateData.status == AuthStatus.authenticated) {
+        // Trigger translation download after first login/authentication
+        ref.read(localizationProvider.notifier).updateTranslations();
+      }
       state = AsyncData(stateData);
     });
 
@@ -39,7 +44,9 @@ class AuthController extends AsyncNotifier<AuthState> {
     state = const AsyncLoading();
     try {
       await _repository.login(username, password);
-      // state will be automatically updated via the stream listener
+      // Ensure translations are synced before completing login
+      await ref.read(localizationProvider.notifier).updateTranslations();
+      // state will be automatically updated via the stream listener in build()
     } catch (e, st) {
       state = AsyncError(e, st);
     }
