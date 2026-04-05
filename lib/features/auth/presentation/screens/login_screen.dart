@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,8 +16,8 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
-  final _emailController = TextEditingController(text: 'admin@example.com');
-  final _passwordController = TextEditingController(text: 'password');
+  final _emailController = TextEditingController(text: kDebugMode ? 'admin@example.com' : '');
+  final _passwordController = TextEditingController(text: kDebugMode ? 'password' : '');
 
   @override
   void dispose() {

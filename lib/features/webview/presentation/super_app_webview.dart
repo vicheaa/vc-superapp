@@ -104,7 +104,8 @@ class _SuperAppWebViewState extends State<SuperAppWebView> {
     final bundleDir = Directory(p.dirname(indexHtmlPath));
 
     // Bind to a random available port on localhost
-    _localServer = await HttpServer.bind('127.0.0.1', 0);
+    _localServer = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    _localServer!.idleTimeout = const Duration(seconds: 120);
     final port = _localServer!.port;
     debugPrint('Local server started on port $port for ${bundleDir.path}');
 

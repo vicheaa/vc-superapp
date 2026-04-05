@@ -18,4 +18,7 @@ abstract class AuthRepository {
 
   /// Forcefully mark the user as unauthenticated (e.g., used by interceptors on 401)
   void markUnauthenticated();
+
+  /// Release resources (e.g., close stream controllers)
+  void dispose();
 }

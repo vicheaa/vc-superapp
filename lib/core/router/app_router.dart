@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -31,7 +32,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/splash',
     refreshListenable: listenable,
-    debugLogDiagnostics: true,
+    debugLogDiagnostics: kDebugMode,
     redirect: (context, state) {
       final authStateAsync = ref.read(authProvider);
 
@@ -54,11 +55,6 @@ final routerProvider = Provider<GoRouter>((ref) {
       // If authenticated and trying to go to login or splash, redirect to home
       if (isAuth && (isGoingToLogin || isGoingToSplash)) {
         return '/';
-      }
-
-      // If unauthenticated and on splash, go to login
-      if (!isAuth && isGoingToSplash) {
-        return '/login';
       }
 
       // Check RBAC

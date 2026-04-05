@@ -124,7 +124,7 @@ class _LanguageCard extends StatelessWidget {
               children: [
                 Container(
                   padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: AppColors.neutral50,
                     shape: BoxShape.circle,
                   ),

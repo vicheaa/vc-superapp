@@ -14,6 +14,8 @@ class ProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(authProvider).value?.user;
+    ref.watch(localizationProvider);
+    final l10n = ref.read(localizationProvider.notifier);
 
     return Scaffold(
       backgroundColor: AppColors.neutral50,
@@ -32,7 +34,7 @@ class ProfileScreen extends ConsumerWidget {
           children: [
             _buildHeader(context, user),
             const SizedBox(height: 24),
-            _buildSettingsList(context, ref),
+            _buildSettingsList(context, ref, l10n),
             const SizedBox(height: 32),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -105,7 +107,7 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildSettingsList(BuildContext context, WidgetRef ref) {
+  Widget _buildSettingsList(BuildContext context, WidgetRef ref, LocalizationNotifier l10n) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10),
       width: MediaQuery.of(context).size.width - 32, 
@@ -119,19 +121,19 @@ class ProfileScreen extends ConsumerWidget {
             icon: Icons.person_outline,
             title: 'Account Information',
             onTap: () {},
-            ref: ref,
+            l10n: l10n,
           ),
           _buildSettingItem(
             icon: Icons.security_outlined,
             title: 'Security & Password',
             onTap: () {},
-            ref: ref,
+            l10n: l10n,
           ),
           _buildSettingItem(
             icon: Icons.notifications_none_outlined,
             title: 'Notification Preferences',
             onTap: () {},
-            ref: ref,
+            l10n: l10n,
           ),
           _buildSettingItem(
             icon: Icons.language,
@@ -139,25 +141,25 @@ class ProfileScreen extends ConsumerWidget {
             onTap: () {
               context.push('/localization');
             },
-            ref: ref,
+            l10n: l10n,
           ),
           _buildSettingItem(
             icon: Icons.privacy_tip_outlined,
             title: 'Privacy Policy',
             onTap: () {},
-            ref: ref,
+            l10n: l10n,
           ),
           _buildSettingItem(
             icon: Icons.help_outline,
             title: 'Help & Support',
             onTap: () {},
-            ref: ref,
+            l10n: l10n,
           ),
           _buildSettingItem(
             icon: Icons.info_outline,
             title: 'setting.about_app',
             onTap: () {},
-            ref: ref,
+            l10n: l10n,
           ),
         ],
       ),
@@ -168,10 +170,8 @@ class ProfileScreen extends ConsumerWidget {
     required IconData icon,
     required String title,
     required VoidCallback onTap,
-    required WidgetRef ref,
+    required LocalizationNotifier l10n,
   }) {
-    ref.watch(localizationProvider);
-    final notifier = ref.read(localizationProvider.notifier);
     return Container(
       // margin: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
@@ -193,7 +193,7 @@ class ProfileScreen extends ConsumerWidget {
         //   style: AppTextStyles.bodyMedium,
         // ),
         title: Text(
-          notifier.translate(title),
+          l10n.translate(title),
           style: AppTextStyles.bodyMedium,
         ),
         trailing: const Icon(

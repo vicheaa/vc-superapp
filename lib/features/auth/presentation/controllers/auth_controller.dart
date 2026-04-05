@@ -24,10 +24,7 @@ class AuthController extends AsyncNotifier<AuthState> {
 
     // Listen to repository status changes and update state accordingly
     _statusSubscription = _repository.statusStream.listen((stateData) {
-      if (stateData.status == AuthStatus.authenticated) {
-        // Trigger translation download after first login/authentication
-        ref.read(localizationProvider.notifier).updateTranslations();
-      }
+      // Translation sync is handled explicitly in login()
       state = AsyncData(stateData);
     });
 

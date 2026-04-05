@@ -5,7 +5,7 @@ import '../../miniapps/domain/miniapp_repository.dart';
 import '../../miniapps/domain/models/miniapp_manifest.dart';
 
 /// Provider for available mini-apps.
-final miniAppsProvider = FutureProvider.autoDispose<List<MiniAppManifest>>((ref) {
+final miniAppsProvider = FutureProvider<List<MiniAppManifest>>((ref) {
   final repo = getIt<MiniAppRepository>();
   return repo.getAvailableMiniApps();
 });

@@ -1,6 +1,7 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+import '../../core/utils/logger.dart';
 
 /// Wrapper around [FlutterSecureStorage] for managing auth tokens.
 class SecureStorageService {
@@ -22,9 +23,7 @@ class SecureStorageService {
     try {
       return await _storage.read(key: _accessTokenKey);
     } catch (e) {
-      if (kDebugMode) {
-        print('Error reading access token: $e');
-      }
+      AppLogger.error('Error reading access token', error: e, tag: 'STORAGE');
       return null;
     }
   }
@@ -34,9 +33,7 @@ class SecureStorageService {
       await _storage.write(key: _accessTokenKey, value: token);
       return true;
     } catch (e) {
-      if (kDebugMode) {
-        print('Error saving access token: $e');
-      }
+      AppLogger.error('Error saving access token', error: e, tag: 'STORAGE');
       return false;
     }
   }
@@ -48,9 +45,7 @@ class SecureStorageService {
       await _storage.write(key: _userDataKey, value: jsonEncode(userData));
       return true;
     } catch (e) {
-      if (kDebugMode) {
-        print('Error saving user data: $e');
-      }
+      AppLogger.error('Error saving user data', error: e, tag: 'STORAGE');
       return false;
     }
   }
@@ -61,9 +56,7 @@ class SecureStorageService {
       if (jsonStr == null) return null;
       return jsonDecode(jsonStr) as Map<String, dynamic>;
     } catch (e) {
-      if (kDebugMode) {
-        print('Error reading user data: $e');
-      }
+      AppLogger.error('Error reading user data', error: e, tag: 'STORAGE');
       return null;
     }
   }
@@ -73,9 +66,7 @@ class SecureStorageService {
       await _storage.delete(key: _userDataKey);
       return true;
     } catch (e) {
-      if (kDebugMode) {
-        print('Error deleting user data: $e');
-      }
+      AppLogger.error('Error deleting user data', error: e, tag: 'STORAGE');
       return false;
     }
   }
@@ -85,9 +76,7 @@ class SecureStorageService {
       await _storage.delete(key: _accessTokenKey);
       return true;
     } catch (e) {
-      if (kDebugMode) {
-        print('Error deleting access token: $e');
-      }
+      AppLogger.error('Error deleting access token', error: e, tag: 'STORAGE');
       return false;
     }
   }
@@ -98,9 +87,7 @@ class SecureStorageService {
     try {
       return await _storage.read(key: _refreshTokenKey);
     } catch (e) {
-      if (kDebugMode) {
-        print('Error reading refresh token: $e');
-      }
+      AppLogger.error('Error reading refresh token', error: e, tag: 'STORAGE');
       return null;
     }
   }
@@ -110,9 +97,7 @@ class SecureStorageService {
       await _storage.write(key: _refreshTokenKey, value: token);
       return true;
     } catch (e) {
-      if (kDebugMode) {
-        print('Error saving refresh token: $e');
-      }
+      AppLogger.error('Error saving refresh token', error: e, tag: 'STORAGE');
       return false;
     }
   }
@@ -122,9 +107,7 @@ class SecureStorageService {
       await _storage.delete(key: _refreshTokenKey);
       return true;
     } catch (e) {
-      if (kDebugMode) {
-        print('Error deleting refresh token: $e');
-      }
+      AppLogger.error('Error deleting refresh token', error: e, tag: 'STORAGE');
       return false;
     }
   }
@@ -136,13 +119,10 @@ class SecureStorageService {
       await _storage.deleteAll();
       return true;
     } catch (e) {
-      if (kDebugMode) {
-        print('Error clearing all: $e');
-      }
+      AppLogger.error('Error clearing all storage', error: e, tag: 'STORAGE');
       return false;
     }
   }
-
 
   // ──── FCM Token ────
 
@@ -151,9 +131,7 @@ class SecureStorageService {
       await _storage.write(key: _fcmtoken, value: token);
       return true;
     } catch (e) {
-      if (kDebugMode) {
-        print('Error saving FCM token: $e');
-      }
+      AppLogger.error('Error saving FCM token', error: e, tag: 'STORAGE');
       return false;
     }
   }
@@ -162,9 +140,7 @@ class SecureStorageService {
     try {
       return await _storage.read(key: _fcmtoken);
     } catch (e) {
-      if (kDebugMode) {
-        print('Error reading FCM token: $e');
-      }
+      AppLogger.error('Error reading FCM token', error: e, tag: 'STORAGE');
       return null;
     }
   }
@@ -174,9 +150,7 @@ class SecureStorageService {
       await _storage.delete(key: _fcmtoken);
       return true;
     } catch (e) {
-      if (kDebugMode) {
-        print('Error deleting FCM token: $e');
-      }
+      AppLogger.error('Error deleting FCM token', error: e, tag: 'STORAGE');
       return false;
     }
   }
@@ -188,9 +162,7 @@ class SecureStorageService {
       await _storage.write(key: _usernameKey, value: username);
       return true;
     } catch (e) {
-      if (kDebugMode) {
-        print('Error saving username: $e');
-      }
+      AppLogger.error('Error saving username', error: e, tag: 'STORAGE');
       return false;
     }
   }
@@ -199,9 +171,7 @@ class SecureStorageService {
     try {
       return await _storage.read(key: _usernameKey);
     } catch (e) {
-      if (kDebugMode) {
-        print('Error reading username: $e');
-      }
+      AppLogger.error('Error reading username', error: e, tag: 'STORAGE');
       return null;
     }
   }
@@ -211,9 +181,7 @@ class SecureStorageService {
       await _storage.write(key: _passwordKey, value: password);
       return true;
     } catch (e) {
-      if (kDebugMode) {
-        print('Error saving password: $e');
-      }
+      AppLogger.error('Error saving password', error: e, tag: 'STORAGE');
       return false;
     }
   }
@@ -222,9 +190,7 @@ class SecureStorageService {
     try {
       return await _storage.read(key: _passwordKey);
     } catch (e) {
-      if (kDebugMode) {
-        print('Error reading password: $e');
-      }
+      AppLogger.error('Error reading password', error: e, tag: 'STORAGE');
       return null;
     }
   }
@@ -234,20 +200,16 @@ class SecureStorageService {
       await _storage.delete(key: _accessTokenKey);
       return true;
     } catch (e) {
-      if (kDebugMode) {
-        print('Error deleting token: $e');
-      }
+      AppLogger.error('Error deleting token', error: e, tag: 'STORAGE');
       return false;
     }
   }
 
-    Future<String?> getToken() async {
+  Future<String?> getToken() async {
     try {
       return await _storage.read(key: _accessTokenKey);
     } catch (e) {
-      if (kDebugMode) {
-        print('Error reading token: $e');
-      }
+      AppLogger.error('Error reading token', error: e, tag: 'STORAGE');
       return null;
     }
   }
@@ -258,9 +220,7 @@ class SecureStorageService {
     try {
       await _storage.write(key: key, value: value);
     } catch (e) {
-      if (kDebugMode) {
-        print('Error writing key $key: $e');
-      }
+      AppLogger.error('Error writing key $key', error: e, tag: 'STORAGE');
     }
   }
 
@@ -268,9 +228,7 @@ class SecureStorageService {
     try {
       return await _storage.read(key: key);
     } catch (e) {
-      if (kDebugMode) {
-        print('Error reading key $key: $e');
-      }
+      AppLogger.error('Error reading key $key', error: e, tag: 'STORAGE');
       return null;
     }
   }
@@ -279,9 +237,7 @@ class SecureStorageService {
     try {
       await _storage.delete(key: key);
     } catch (e) {
-      if (kDebugMode) {
-        print('Error deleting key $key: $e');
-      }
+      AppLogger.error('Error deleting key $key', error: e, tag: 'STORAGE');
     }
   }
 }
