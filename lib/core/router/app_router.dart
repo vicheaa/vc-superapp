@@ -22,7 +22,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     listenable.dispose();
   });
 
-  ref.listen<AsyncValue<AuthState>>(authProvider, (_, __) {
+  ref.listen<AsyncValue<AuthState>>(authProvider, (_, _) {
     listenable.value = !listenable.value;
   });
 

@@ -22,7 +22,7 @@ class MiniAppGridCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.03),
+              color: AppColors.neutral100.withValues(alpha: 0.03),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -31,20 +31,16 @@ class MiniAppGridCard extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
+            SizedBox(
               width: 52,
               height: 52,
-              decoration: BoxDecoration(
-                color: AppColors.primary50.withOpacity(0.7),
-                borderRadius: BorderRadius.circular(14),
-              ),
               child: Center(
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(10),
                   child: Image.network(
                     app.iconUrl,
-                    width: 30,
-                    height: 30,
+                    width: 50,
+                    height: 50,
                     fit: BoxFit.cover,
                     errorBuilder: (_, _, _) => Icon(
                       Icons.apps_rounded, 

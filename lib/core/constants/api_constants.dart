@@ -20,6 +20,4 @@ class ApiConstants {
   // Endpoints
   static const String login = '/auth/login';
   static const String refreshToken = '/auth/refresh';
-  static const String posts = '/posts';
-  static const String news = '/news';
 }

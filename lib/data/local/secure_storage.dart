@@ -251,4 +251,37 @@ class SecureStorageService {
       return null;
     }
   }
+
+  // ──── Generic Storage ────
+
+  Future<void> write(String key, String value) async {
+    try {
+      await _storage.write(key: key, value: value);
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error writing key $key: $e');
+      }
+    }
+  }
+
+  Future<String?> read(String key) async {
+    try {
+      return await _storage.read(key: key);
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error reading key $key: $e');
+      }
+      return null;
+    }
+  }
+
+  Future<void> delete(String key) async {
+    try {
+      await _storage.delete(key: key);
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error deleting key $key: $e');
+      }
+    }
+  }
 }

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/button.dart';
+import '../../../../core/widgets/dialog.dart';
 import '../../auth/presentation/controllers/auth_controller.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -30,7 +31,7 @@ class ProfileScreen extends ConsumerWidget {
           children: [
             _buildHeader(context, user),
             const SizedBox(height: 24),
-            _buildSettingsList(context),
+            _buildSettingsList(context, ref),
             const SizedBox(height: 32),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -65,11 +66,11 @@ class ProfileScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: Colors.white.withOpacity(0.2), width: 2),
+              border: Border.all(color: AppColors.neutral10.withValues(alpha: 0.2), width: 2),
             ),
             child: CircleAvatar(
               radius: 50,
-              backgroundColor: Colors.white.withOpacity(0.1),
+              backgroundColor: AppColors.neutral10.withValues(alpha: 0.1),
               backgroundImage: user?.avatarUrl != null ? NetworkImage(user!.avatarUrl!) : null,
               child: user?.avatarUrl == null
                   ? Text(
@@ -95,7 +96,7 @@ class ProfileScreen extends ConsumerWidget {
           Text(
             user?.email ?? 'user@example.com',
             style: AppTextStyles.bodyMedium.copyWith(
-              color: Colors.white.withOpacity(0.8),
+              color: AppColors.neutral100.withValues(alpha: 0.8),
             ),
           ),
         ],
@@ -103,7 +104,7 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildSettingsList(BuildContext context) {
+  Widget _buildSettingsList(BuildContext context, WidgetRef ref) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10),
       width: MediaQuery.of(context).size.width - 32, 
@@ -126,6 +127,11 @@ class ProfileScreen extends ConsumerWidget {
           _buildSettingItem(
             icon: Icons.notifications_none_outlined,
             title: 'Notification Preferences',
+            onTap: () {},
+          ),
+          _buildSettingItem(
+            icon: Icons.language,
+            title: 'App Language',
             onTap: () {},
           ),
           _buildSettingItem(
@@ -164,17 +170,14 @@ class ProfileScreen extends ConsumerWidget {
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: AppColors.primary50.withOpacity(0.5),
+            color: AppColors.primary50.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(icon, color: AppColors.primary500, size: 22),
         ),
         title: Text(
           title,
-          style: AppTextStyles.bodyLarge.copyWith(
-            fontWeight: FontWeight.w600,
-            color: AppColors.neutral800,
-          ),
+          style: AppTextStyles.bodyMedium,
         ),
         trailing: const Icon(
           Icons.chevron_right,
@@ -186,22 +189,24 @@ class ProfileScreen extends ConsumerWidget {
   }
 
   void _handleLogout(BuildContext context, WidgetRef ref) {
-    showDialog(
+    showAppDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to log out?'),
+      barrierBlur: 1.0, 
+      builder: (context) => AppAlertDialog(
+        icon: Icon(Icons.warning_amber_rounded, color: AppColors.red500, size: 24),
+        iconBgColor: AppColors.red500.withValues(alpha: 0.2),
+        content: const Text('Are you sure you want to log out?', textAlign: TextAlign.center,),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: const Text('Cancel', style: TextStyle(fontWeight: FontWeight.w400),),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
               ref.read(authProvider.notifier).logout();
             },
-            child: const Text('Logout', style: TextStyle(color: AppColors.red500)),
+            child: const Text('Logout', style: TextStyle(color: AppColors.red500, fontWeight: FontWeight.w400)),
           ),
         ],
       ),

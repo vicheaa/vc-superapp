@@ -34,11 +34,11 @@ class HomeHeader extends StatelessWidget {
               padding: const EdgeInsets.all(2),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.white.withOpacity(0.2), width: 1.5),
+                border: Border.all(color: AppColors.neutral10.withValues(alpha: 0.2), width: 1.5),
               ),
               child: CircleAvatar(
                 radius: 28,
-                backgroundColor: Colors.white.withOpacity(0.1),
+                backgroundColor: AppColors.neutral10.withValues(alpha: 0.1),
                 backgroundImage: user?.avatarUrl != null ? NetworkImage(user!.avatarUrl!) : null,
                 child: user?.avatarUrl == null
                     ? Text(
@@ -62,8 +62,9 @@ class HomeHeader extends StatelessWidget {
                 Text(
                   'Welcome back,',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.white.withOpacity(0.7),
-                        fontWeight: FontWeight.w400,
+                        color: AppColors.neutral10.withValues(alpha: 0.7),
+                        fontWeight: FontWeight.w500,
+                        fontFamily: 'Kantumruy',
                       ),
                 ),
                 Text(
